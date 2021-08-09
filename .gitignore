@@ -1,0 +1,17 @@
+### Windows ###
+[Dd]esktop.ini
+
+### macOS ###
+.DS_Store
+._*
+
+### C++ ###
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.a
+*.lib
+*.exe
+*.out
