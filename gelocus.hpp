@@ -35,6 +35,9 @@ public:
 
     explicit Position(Vec v) : vec(v) {}
 
+    template <Frame To>
+    Position<To> transform(double jd) const;
+
     const auto& operator()(size_t i) const {
         return vec(i);
     }
@@ -57,6 +60,11 @@ public:
 
     explicit Transformation(double jd);
 
+    // TODO: Think about impling `operator*` as `Mat * Vec`
+    Position<To> apply(const Position<From> &pos) const {
+        return Position<To>(this->mat * pos.vec);
+    }
+
     template <Frame FromR>
     Transformation<FromR, To> operator*(const Transformation<FromR, From> &rhs) const {
         return Transformation<FromR, To>(this->mat * rhs.mat);
@@ -76,6 +84,13 @@ std::ostream& operator<<(std::ostream &os, Frame f) {
         case Frame::ECEF: return os << "ECEF";
     };
     throw std::invalid_argument("Invalid frame type");
+}
+
+template <Frame F>
+template <Frame To>
+Position<To> Position<F>::transform(const double jd) const {
+    const auto A = Transformation<F, To>(jd);
+    return A.apply(*this);
 }
 
 } // namespace gelocus
