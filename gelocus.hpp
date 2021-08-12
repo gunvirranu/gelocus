@@ -101,6 +101,18 @@ Position<To> Position<F>::transform(const double jd) const {
     return A.apply(*this);
 }
 
+// Implemented "Basic" Transformations
+
+template <Frame From, Frame To>
+Transformation<From, To>::Transformation(const double jd) {
+    static_assert(From == To, "This transformation is not implemented");
+    (void) jd;  // To ignore unused value
+    // Use  identity matrix since `From == To`
+    mat(0, 0) = 1; mat(0, 1) = 0; mat(0, 2) = 0;
+    mat(1, 0) = 0; mat(1, 1) = 1; mat(1, 2) = 0;
+    mat(2, 0) = 0; mat(2, 1) = 0; mat(2, 2) = 1;
+}
+
 } // namespace gelocus
 
 #endif // GELOCUS_HPP
