@@ -8,11 +8,15 @@
 #ifndef GELOCUS_VEC3
 #error Must define `GELOCUS_VEC3` type
 #endif
+#ifndef GELOCUS_MATRIX3
+#error Must define `GELOCUS_MATRIX3` type
+#endif
 
 namespace gelocus {
 
 using std::size_t;
 using Vec = GELOCUS_VEC3;
+using Matrix = GELOCUS_MATRIX3;
 
 enum class Frame {
     J2000,
@@ -44,6 +48,25 @@ public:
     }
 };
 
+template <Frame From, Frame To>
+class Transformation {
+public:
+    Matrix mat;
+
+    explicit Transformation(Matrix mat) : mat(mat) {}
+
+    explicit Transformation(double jd);
+
+    template <Frame FromR>
+    Transformation<FromR, To> operator*(const Transformation<FromR, From> &rhs) const {
+        return Transformation<FromR, To>(this->mat * rhs.mat);
+    }
+
+    friend std::ostream& operator<<(std::ostream &os, const Transformation &A) {
+        return os << "Transformation<" << From << ", " << To << "> { " << A.mat << " }";
+    }
+};
+
 std::ostream& operator<<(std::ostream &os, Frame f) {
     switch (f) {
         case Frame::J2000: return os << "J2000";
@@ -52,7 +75,7 @@ std::ostream& operator<<(std::ostream &os, Frame f) {
         case Frame::PEF: return os << "PEF";
         case Frame::ECEF: return os << "ECEF";
     };
-    throw std::runtime_error("Invalid frame type");
+    throw std::invalid_argument("Invalid frame type");
 }
 
 } // namespace gelocus
