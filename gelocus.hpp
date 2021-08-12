@@ -11,6 +11,9 @@
 #ifndef GELOCUS_MATRIX3
 #error Must define `GELOCUS_MATRIX3` type
 #endif
+#ifndef GELOCUS_MATRIX3_TRANSPOSED
+#error Must define `GELOCUS_MATRIX3_TRANSPOSED` method
+#endif
 
 namespace gelocus {
 
@@ -59,6 +62,11 @@ public:
     explicit Transformation(Matrix mat) : mat(mat) {}
 
     explicit Transformation(double jd);
+
+    Transformation<To, From> inverse() const {
+        Matrix mat_T = this->mat.GELOCUS_MATRIX3_TRANSPOSED();
+        return Transformation<To, From>(mat_T);
+    }
 
     // TODO: Think about impling `operator*` as `Mat * Vec`
     Position<To> apply(const Position<From> &pos) const {
