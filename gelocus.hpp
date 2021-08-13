@@ -448,6 +448,12 @@ Transformation<Frame::ECEF, Frame::PEF>::Transformation(const double jd, const E
     detail::fk5_polar_motion(eop, this->mat);
 }
 
+template <>
+Transformation<Frame::TEME, Frame::PEF>::Transformation(const double jd, const EOPData eop) {
+    (void) eop;  // To ignore unused value
+    detail::teme_to_pef(jd, this->mat);
+}
+
 // Compound transformations
 
 template <>
@@ -472,6 +478,13 @@ Transformation<Frame::ECEF, Frame::J2000>::Transformation(const double jd, const
 }
 
 template <>
+Transformation<Frame::TEME, Frame::J2000>::Transformation(const double jd, const EOPData eop) {
+    const auto teme_to_pef = Transformation<Frame::TEME, Frame::PEF>(jd, eop);
+    const auto pef_to_j2000 = Transformation<Frame::PEF, Frame::J2000>(jd, eop);
+    *this = pef_to_j2000 * teme_to_pef;
+}
+
+template <>
 Transformation<Frame::PEF, Frame::MOD>::Transformation(const double jd, const EOPData eop) {
     const auto pef_to_tod = Transformation<Frame::PEF, Frame::TOD>(jd, eop);
     const auto tod_to_mod = Transformation<Frame::TOD, Frame::MOD>(jd, eop);
@@ -486,10 +499,31 @@ Transformation<Frame::ECEF, Frame::MOD>::Transformation(const double jd, const E
 }
 
 template <>
+Transformation<Frame::TEME, Frame::MOD>::Transformation(const double jd, const EOPData eop) {
+    const auto teme_to_pef = Transformation<Frame::TEME, Frame::PEF>(jd, eop);
+    const auto pef_to_mod = Transformation<Frame::PEF, Frame::MOD>(jd, eop);
+    *this = pef_to_mod * teme_to_pef;
+}
+
+template <>
 Transformation<Frame::ECEF, Frame::TOD>::Transformation(const double jd, const EOPData eop) {
     const auto ecef_to_pef = Transformation<Frame::ECEF, Frame::PEF>(jd, eop);
     const auto pef_to_tod = Transformation<Frame::PEF, Frame::TOD>(jd, eop);
     *this = pef_to_tod * ecef_to_pef;
+}
+
+template <>
+Transformation<Frame::TEME, Frame::TOD>::Transformation(const double jd, const EOPData eop) {
+    const auto teme_to_pef = Transformation<Frame::TEME, Frame::PEF>(jd, eop);
+    const auto pef_to_tod = Transformation<Frame::PEF, Frame::TOD>(jd, eop);
+    *this = pef_to_tod * teme_to_pef;
+}
+
+template <>
+Transformation<Frame::TEME, Frame::ECEF>::Transformation(const double jd, const EOPData eop) {
+    const auto teme_to_pef = Transformation<Frame::TEME, Frame::PEF>(jd, eop);
+    const auto pef_to_ecef = Transformation<Frame::ECEF, Frame::PEF>(jd, eop).inverse();
+    *this = pef_to_ecef * teme_to_pef;
 }
 
 // Inverse Transformations
@@ -519,6 +553,12 @@ Transformation<Frame::PEF, Frame::ECEF>::Transformation(const double jd, const E
 }
 
 template <>
+Transformation<Frame::PEF, Frame::TEME>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::TEME, Frame::PEF>(jd, eop);
+    *this = inverse.inverse();
+}
+
+template <>
 Transformation<Frame::J2000, Frame::TOD>::Transformation(const double jd, const EOPData eop) {
     auto const inverse = Transformation<Frame::TOD, Frame::J2000>(jd, eop);
     *this = inverse.inverse();
@@ -537,6 +577,12 @@ Transformation<Frame::J2000, Frame::ECEF>::Transformation(const double jd, const
 }
 
 template <>
+Transformation<Frame::J2000, Frame::TEME>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::TEME, Frame::J2000>(jd, eop);
+    *this = inverse.inverse();
+}
+
+template <>
 Transformation<Frame::MOD, Frame::PEF>::Transformation(const double jd, const EOPData eop) {
     auto const inverse = Transformation<Frame::PEF, Frame::MOD>(jd, eop);
     *this = inverse.inverse();
@@ -549,8 +595,26 @@ Transformation<Frame::MOD, Frame::ECEF>::Transformation(const double jd, const E
 }
 
 template <>
+Transformation<Frame::MOD, Frame::TEME>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::TEME, Frame::MOD>(jd, eop);
+    *this = inverse.inverse();
+}
+
+template <>
 Transformation<Frame::TOD, Frame::ECEF>::Transformation(const double jd, const EOPData eop) {
     auto const inverse = Transformation<Frame::ECEF, Frame::TOD>(jd, eop);
+    *this = inverse.inverse();
+}
+
+template <>
+Transformation<Frame::TOD, Frame::TEME>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::TEME, Frame::TOD>(jd, eop);
+    *this = inverse.inverse();
+}
+
+template <>
+Transformation<Frame::ECEF, Frame::TEME>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::TEME, Frame::ECEF>(jd, eop);
     *this = inverse.inverse();
 }
 
