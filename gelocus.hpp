@@ -36,6 +36,15 @@ enum class Frame {
 
 std::ostream& operator<<(std::ostream &os, Frame f);
 
+struct EOPData {
+    double xp, yp;  // [rad]
+    double dPsi, dEps;
+    // Not used for IAU-76/FK5 transformations
+    double dX, dY;
+
+    EOPData() : xp(0), yp(0), dPsi(0), dEps(0), dX(0), dY(0) {}
+};
+
 template <Frame F>
 class Position {
 public:
@@ -44,7 +53,7 @@ public:
     explicit Position(Vec v) : vec(v) {}
 
     template <Frame To>
-    Position<To> transform(double jd) const;
+    Position<To> transform(double jd, EOPData eop = EOPData()) const;
 
     const auto& operator()(size_t i) const {
         return vec(i);
@@ -66,7 +75,7 @@ public:
 
     explicit Transformation(Matrix mat) : mat(mat) {}
 
-    explicit Transformation(double jd);
+    explicit Transformation(double jd, EOPData eop = EOPData());
 
     Transformation<To, From> inverse() const {
         Matrix mat_T = this->mat.GELOCUS_MATRIX3_TRANSPOSED();
@@ -101,8 +110,8 @@ std::ostream& operator<<(std::ostream &os, Frame f) {
 
 template <Frame F>
 template <Frame To>
-Position<To> Position<F>::transform(const double jd) const {
-    const auto A = Transformation<F, To>(jd);
+Position<To> Position<F>::transform(const double jd, const EOPData eop) const {
+    const auto A = Transformation<F, To>(jd, eop);
     return A.apply(*this);
 }
 
@@ -282,7 +291,7 @@ static constexpr struct Iau80NutCoeffSet IAU80_NUT_COEFFS[IAU80_TOTAL_NUT_TERMS]
 
 // TOD to MOD
 static void iau80_nutation(
-    const double jc,
+    const double jc, const EOPData eop,
     Matrix &N, double &mean_eps, double &omega, double &delta_psi
 ) {
     constexpr double P1MAS_TO_RADS = 1e-4 * PI / (180.0 * 3600);
@@ -314,7 +323,9 @@ static void iau80_nutation(
         delta_psi += (NUT_COEFFS[i].sp + jc * NUT_COEFFS[i].spt) * std::sin(arg);
         delta_eps += (NUT_COEFFS[i].ce + jc * NUT_COEFFS[i].cet) * std::cos(arg);
     }
-    // FIXME: Add in EOP corrections to GCRF
+    // Add in EOP corrections to GCRF
+    delta_psi += eop.dPsi;
+    delta_eps += eop.dEps;
     delta_psi = std::fmod(delta_psi * P1MAS_TO_RADS, 2 * PI);
     delta_eps = std::fmod(delta_eps * P1MAS_TO_RADS, 2 * PI);
     const double true_eps = mean_eps + delta_eps;
@@ -359,9 +370,10 @@ static void iau76_sidereal(
 // Implemented "Basic" Transformations
 
 template <Frame From, Frame To>
-Transformation<From, To>::Transformation(const double jd) {
+Transformation<From, To>::Transformation(const double jd, const EOPData eop) {
     static_assert(From == To, "This transformation is not implemented");
     (void) jd;  // To ignore unused value
+    (void) eop;
     // Use  identity matrix since `From == To`
     mat(0, 0) = 1; mat(0, 1) = 0; mat(0, 2) = 0;
     mat(1, 0) = 0; mat(1, 1) = 1; mat(1, 2) = 0;
