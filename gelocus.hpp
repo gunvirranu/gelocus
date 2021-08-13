@@ -135,6 +135,34 @@ double greenwich_mean_sidereal_time(const double jc_ut1) {
     return gmst;
 }
 
+// MOD to J2000
+static void iau76_precession(const double jc, Matrix &P) {
+    constexpr double arcsec_to_rad = PI / (180.0 * 3600);
+    // All in [arcsecond], uses Horner's method
+    double zeta = jc * (2306.2181 + jc * (0.30188 + jc * 0.017998));
+    double theta = jc * (2004.3109 + jc * (-0.42665 + jc * -0.041833));
+    double z = jc * (2306.2181 + jc * (1.09468 + jc * 0.018203));
+    zeta *= arcsec_to_rad;
+    theta *= arcsec_to_rad;
+    z *= arcsec_to_rad;
+
+    const double cos_zeta = std::cos(zeta);
+    const double sin_zeta = std::sin(zeta);
+    const double cos_theta = std::cos(theta);
+    const double sin_theta = std::sin(theta);
+    const double cos_z = std::cos(z);
+    const double sin_z = std::sin(z);
+    P(0, 0) = cos_zeta * cos_theta * cos_z - sin_zeta * sin_z;
+    P(0, 1) = cos_zeta * cos_theta * sin_z + sin_zeta * cos_z;
+    P(0, 2) = cos_zeta * sin_theta;
+    P(1, 0) = -sin_zeta * cos_theta * cos_z - cos_zeta * sin_z;
+    P(1, 1) = -sin_zeta * cos_theta * sin_z + cos_zeta * cos_z;
+    P(1, 2) = -sin_zeta * sin_theta;
+    P(2, 0) = -sin_theta * cos_z;
+    P(2, 1) = -sin_theta * sin_z;
+    P(2, 2) = cos_theta;
+}
+
 // Implemented "Basic" Transformations
 
 template <Frame From, Frame To>
