@@ -367,6 +367,17 @@ static void iau76_sidereal(
     S(2, 0) = 0      ; S(2, 1) =  0      ; S(2, 2) = 1;
 }
 
+// ECEF to PEF
+static void fk5_polar_motion(const EOPData eop, Matrix &PM) {
+    const double sin_xp = std::sin(eop.xp);
+    const double cos_xp = std::cos(eop.xp);
+    const double sin_yp = std::sin(eop.yp);
+    const double cos_yp = std::cos(eop.yp);
+    PM(0, 0) = cos_xp         ; PM(0, 1) =  0     ; PM(0, 2) = -sin_xp         ;
+    PM(1, 0) = sin_xp * sin_yp; PM(1, 1) =  cos_yp; PM(1, 2) =  cos_xp * sin_yp;
+    PM(2, 0) = sin_xp * cos_yp; PM(2, 1) = -sin_yp; PM(2, 2) =  cos_xp * cos_yp;
+}
+
 // Implemented "Basic" Transformations
 
 template <Frame From, Frame To>
