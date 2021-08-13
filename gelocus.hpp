@@ -396,6 +396,35 @@ Transformation<From, To>::Transformation(const double jd, const EOPData eop) {
     mat(2, 0) = 0; mat(2, 1) = 0; mat(2, 2) = 1;
 }
 
+template <>
+Transformation<Frame::MOD, Frame::J2000>::Transformation(const double jd, const EOPData eop) {
+    const double jc = detail::jd_to_jc(jd);
+    (void) eop;  // To ignore unused value
+    detail::iau76_precession(jc, this->mat);
+}
+
+template <>
+Transformation<Frame::TOD, Frame::MOD>::Transformation(const double jd, const EOPData eop) {
+    const double jc = detail::jd_to_jc(jd);
+    double mean_eps, omega, delta_psi;
+    detail::iau80_nutation(jc, eop, this->mat, mean_eps, omega, delta_psi);
+}
+
+template <>
+Transformation<Frame::PEF, Frame::TOD>::Transformation(const double jd, const EOPData eop) {
+    const double jc = detail::jd_to_jc(jd);
+    double mean_eps, omega, delta_psi;
+    Matrix dummy;
+    detail::iau80_nutation(jc, eop, dummy, mean_eps, omega, delta_psi);
+    detail::iau76_sidereal(jd, mean_eps, omega, delta_psi, this->mat);
+}
+
+template <>
+Transformation<Frame::ECEF, Frame::PEF>::Transformation(const double jd, const EOPData eop) {
+    (void) jd;  // To ignore unused value
+    detail::fk5_polar_motion(eop, this->mat);
+}
+
 } // namespace gelocus
 
 #endif // GELOCUS_HPP
