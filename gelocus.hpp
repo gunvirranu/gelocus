@@ -1,6 +1,7 @@
 #ifndef GELOCUS_HPP
 #define GELOCUS_HPP
 
+#include <cmath>
 #include <cstddef>
 #include <iostream>
 #include <stdexcept>
@@ -20,6 +21,10 @@ namespace gelocus {
 using std::size_t;
 using Vec = GELOCUS_VEC3;
 using Matrix = GELOCUS_MATRIX3;
+
+constexpr double PI = 3.141592653589793238462643383279;
+constexpr double RAD_PER_DEG = 0.017453292519943295769;
+constexpr double DEG_PER_RAD = 57.29577951308232087680;
 
 enum class Frame {
     J2000,
@@ -99,6 +104,35 @@ template <Frame To>
 Position<To> Position<F>::transform(const double jd) const {
     const auto A = Transformation<F, To>(jd);
     return A.apply(*this);
+}
+
+// Util Functions
+
+constexpr double rad_to_deg(const double rad) {
+    return rad * DEG_PER_RAD;
+}
+
+constexpr double deg_to_rad(const double deg) {
+    return deg * RAD_PER_DEG;
+}
+
+constexpr double jd_to_jc(const double jd) {
+    return (jd - 2451545) / 36525;
+}
+
+// FK5 / IAU-76 Theory
+
+double greenwich_mean_sidereal_time(const double jc_ut1) {
+    constexpr double cs[] = {
+        67310.54841, 876600.0 * 3600 + 8640184.812866, 0.093104, -6.2e-6
+    };
+    // Horner's method for polynomial evaluation
+    const double gmst_secs = cs[0] + jc_ut1 * (cs[1] + jc_ut1 * (cs[2] + jc_ut1 * cs[3]));
+    double gmst = std::fmod(deg_to_rad(gmst_secs / 240), 2 * PI);
+    if (gmst < 0) {
+        gmst += 2 * PI;
+    }
+    return gmst;
 }
 
 // Implemented "Basic" Transformations
