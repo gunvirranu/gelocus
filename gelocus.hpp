@@ -469,6 +469,68 @@ Transformation<Frame::ECEF, Frame::TOD>::Transformation(const double jd, const E
     *this = pef_to_tod * ecef_to_pef;
 }
 
+// Inverse Transformations
+
+template <>
+Transformation<Frame::J2000, Frame::MOD>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::MOD, Frame::J2000>(jd, eop);
+    *this = inverse.inverse();
+}
+
+template <>
+Transformation<Frame::MOD, Frame::TOD>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::TOD, Frame::MOD>(jd, eop);
+    *this = inverse.inverse();
+}
+
+template <>
+Transformation<Frame::TOD, Frame::PEF>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::PEF, Frame::TOD>(jd, eop);
+    *this = inverse.inverse();
+}
+
+template <>
+Transformation<Frame::PEF, Frame::ECEF>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::ECEF, Frame::PEF>(jd, eop);
+    *this = inverse.inverse();
+}
+
+template <>
+Transformation<Frame::J2000, Frame::TOD>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::TOD, Frame::J2000>(jd, eop);
+    *this = inverse.inverse();
+}
+
+template <>
+Transformation<Frame::J2000, Frame::PEF>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::PEF, Frame::J2000>(jd, eop);
+    *this = inverse.inverse();
+}
+
+template <>
+Transformation<Frame::J2000, Frame::ECEF>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::ECEF, Frame::J2000>(jd, eop);
+    *this = inverse.inverse();
+}
+
+template <>
+Transformation<Frame::MOD, Frame::PEF>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::PEF, Frame::MOD>(jd, eop);
+    *this = inverse.inverse();
+}
+
+template <>
+Transformation<Frame::MOD, Frame::ECEF>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::ECEF, Frame::MOD>(jd, eop);
+    *this = inverse.inverse();
+}
+
+template <>
+Transformation<Frame::TOD, Frame::ECEF>::Transformation(const double jd, const EOPData eop) {
+    auto const inverse = Transformation<Frame::ECEF, Frame::TOD>(jd, eop);
+    *this = inverse.inverse();
+}
+
 } // namespace gelocus
 
 #endif // GELOCUS_HPP
