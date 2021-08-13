@@ -336,6 +336,26 @@ static void iau80_nutation(
     N(2, 2) = sin_true_eps * sin_eps * cos_psi + cos_true_eps * cos_eps;
 }
 
+// PEF to TOD
+static void iau76_sidereal(
+    const double jd, const double mean_eps, const double omega, const double delta_psi,
+    Matrix &S
+) {
+    const double jc = jd_to_jc(jd);
+    const double gmst = greenwich_mean_sidereal_time(jc);
+    double ast = gmst + delta_psi * std::cos(mean_eps);
+    if (jd > 2450449.5) {
+        ast += 0.002640 * PI / (3600 * 180) * std::sin(omega);
+        ast += 0.000063 * PI / (3600 * 180) * std::sin(2 * omega);
+    }
+    ast = std::fmod(ast, 2 * PI);
+    const double sin_ast = std::sin(ast);
+    const double cos_ast = std::cos(ast);
+    S(0, 0) = cos_ast; S(0, 1) = -sin_ast; S(0, 2) = 0;
+    S(1, 0) = sin_ast; S(1, 1) =  cos_ast; S(1, 2) = 0;
+    S(2, 0) = 0      ; S(2, 1) =  0      ; S(2, 2) = 1;
+}
+
 // Implemented "Basic" Transformations
 
 template <Frame From, Frame To>
