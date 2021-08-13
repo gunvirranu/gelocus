@@ -425,6 +425,50 @@ Transformation<Frame::ECEF, Frame::PEF>::Transformation(const double jd, const E
     detail::fk5_polar_motion(eop, this->mat);
 }
 
+// Compound transformations
+
+template <>
+Transformation<Frame::TOD, Frame::J2000>::Transformation(const double jd, const EOPData eop) {
+    const auto tod_to_mod = Transformation<Frame::TOD, Frame::MOD>(jd, eop);
+    const auto mod_to_j2000 = Transformation<Frame::MOD, Frame::J2000>(jd, eop);
+    *this = mod_to_j2000 * tod_to_mod;
+}
+
+template <>
+Transformation<Frame::PEF, Frame::J2000>::Transformation(const double jd, const EOPData eop) {
+    const auto pef_to_tod = Transformation<Frame::PEF, Frame::TOD>(jd, eop);
+    const auto tod_to_j2000 = Transformation<Frame::TOD, Frame::J2000>(jd, eop);
+    *this = tod_to_j2000 * pef_to_tod;
+}
+
+template <>
+Transformation<Frame::ECEF, Frame::J2000>::Transformation(const double jd, const EOPData eop) {
+    const auto ecef_to_pef = Transformation<Frame::ECEF, Frame::PEF>(jd, eop);
+    const auto pef_to_j2000 = Transformation<Frame::PEF, Frame::J2000>(jd, eop);
+    *this = pef_to_j2000 * ecef_to_pef;
+}
+
+template <>
+Transformation<Frame::PEF, Frame::MOD>::Transformation(const double jd, const EOPData eop) {
+    const auto pef_to_tod = Transformation<Frame::PEF, Frame::TOD>(jd, eop);
+    const auto tod_to_mod = Transformation<Frame::TOD, Frame::MOD>(jd, eop);
+    *this = tod_to_mod * pef_to_tod;
+}
+
+template <>
+Transformation<Frame::ECEF, Frame::MOD>::Transformation(const double jd, const EOPData eop) {
+    const auto ecef_to_pef = Transformation<Frame::ECEF, Frame::PEF>(jd, eop);
+    const auto pef_to_mod = Transformation<Frame::PEF, Frame::MOD>(jd, eop);
+    *this = pef_to_mod * ecef_to_pef;
+}
+
+template <>
+Transformation<Frame::ECEF, Frame::TOD>::Transformation(const double jd, const EOPData eop) {
+    const auto ecef_to_pef = Transformation<Frame::ECEF, Frame::PEF>(jd, eop);
+    const auto pef_to_tod = Transformation<Frame::PEF, Frame::TOD>(jd, eop);
+    *this = pef_to_tod * ecef_to_pef;
+}
+
 } // namespace gelocus
 
 #endif // GELOCUS_HPP
