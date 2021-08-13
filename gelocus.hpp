@@ -115,8 +115,6 @@ Position<To> Position<F>::transform(const double jd, const EOPData eop) const {
     return A.apply(*this);
 }
 
-// Util Functions
-
 constexpr double rad_to_deg(const double rad) {
     return rad * DEG_PER_RAD;
 }
@@ -124,6 +122,11 @@ constexpr double rad_to_deg(const double rad) {
 constexpr double deg_to_rad(const double deg) {
     return deg * RAD_PER_DEG;
 }
+
+// For pseudo-"private" implementation details
+namespace detail {
+
+// Common
 
 constexpr double jd_to_jc(const double jd) {
     return (jd - 2451545) / 36525;
@@ -145,7 +148,7 @@ double greenwich_mean_sidereal_time(const double jc_ut1) {
 }
 
 // MOD to J2000
-static void iau76_precession(const double jc, Matrix &P) {
+void iau76_precession(const double jc, Matrix &P) {
     constexpr double arcsec_to_rad = PI / (180.0 * 3600);
     // All in [arcsecond], uses Horner's method
     double zeta = jc * (2306.2181 + jc * (0.30188 + jc * 0.017998));
@@ -178,8 +181,8 @@ struct Iau80NutCoeffSet {
     double ce, cet;         // Obliquity cosine coefficients in 0.1 mas
     int idx;                // Original index of coefficient set
 };
-static constexpr size_t IAU80_TOTAL_NUT_TERMS = 106;
-static constexpr struct Iau80NutCoeffSet IAU80_NUT_COEFFS[IAU80_TOTAL_NUT_TERMS] = {
+constexpr size_t IAU80_TOTAL_NUT_TERMS = 106;
+constexpr struct Iau80NutCoeffSet IAU80_NUT_COEFFS[IAU80_TOTAL_NUT_TERMS] = {
     // Ordered by largest coefficients first. Original index is `idx`.
     {  0,  0,  0,  0,  1, -171996.0, -174.2, 92025.0,  8.9,   1 },
     {  0,  0,  2, -2,  2,  -13187.0,   -1.6,  5736.0, -3.1,   9 },
@@ -290,7 +293,7 @@ static constexpr struct Iau80NutCoeffSet IAU80_NUT_COEFFS[IAU80_TOTAL_NUT_TERMS]
 };
 
 // TOD to MOD
-static void iau80_nutation(
+void iau80_nutation(
     const double jc, const EOPData eop,
     Matrix &N, double &mean_eps, double &omega, double &delta_psi
 ) {
@@ -348,7 +351,7 @@ static void iau80_nutation(
 }
 
 // PEF to TOD
-static void iau76_sidereal(
+void iau76_sidereal(
     const double jd, const double mean_eps, const double omega, const double delta_psi,
     Matrix &S
 ) {
@@ -368,7 +371,7 @@ static void iau76_sidereal(
 }
 
 // ECEF to PEF
-static void fk5_polar_motion(const EOPData eop, Matrix &PM) {
+void fk5_polar_motion(const EOPData eop, Matrix &PM) {
     const double sin_xp = std::sin(eop.xp);
     const double cos_xp = std::cos(eop.xp);
     const double sin_yp = std::sin(eop.yp);
@@ -377,6 +380,8 @@ static void fk5_polar_motion(const EOPData eop, Matrix &PM) {
     PM(1, 0) = sin_xp * sin_yp; PM(1, 1) =  cos_yp; PM(1, 2) =  cos_xp * sin_yp;
     PM(2, 0) = sin_xp * cos_yp; PM(2, 1) = -sin_yp; PM(2, 2) =  cos_xp * cos_yp;
 }
+
+} // namespace detail
 
 // Implemented "Basic" Transformations
 
