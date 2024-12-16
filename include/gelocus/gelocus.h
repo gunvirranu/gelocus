@@ -57,9 +57,9 @@ typedef struct {
 /// dig into this source and modify as needed to use your types. It should be relatively
 /// straightforward. Let me know if you think of a cool way to support both.
 typedef struct {
-    lib_gelocus_Vec3 col1;  ///< Column 1 of 3×3 matrix, indices [i, 0]
-    lib_gelocus_Vec3 col2;  ///< Column 2 of 3×3 matrix, indices [i, 1]
-    lib_gelocus_Vec3 col3;  ///< Column 3 of 3×3 matrix, indices [i, 2]
+    lib_gelocus_Vec3 row1;  ///< Row 1 of 3×3 matrix, indices [0, i]
+    lib_gelocus_Vec3 row2;  ///< Row 2 of 3×3 matrix, indices [1, i]
+    lib_gelocus_Vec3 row3;  ///< Row 3 of 3×3 matrix, indices [2, i]
 } lib_gelocus_Matrix3;
 
 /// Reference Frames
@@ -131,6 +131,9 @@ typedef struct {
     lib_gelocus_Matrix3 matrix;     ///< Linear transformation as a 3×3 matrix
 } lib_gelocus_Transformation;
 
+/// Dot/inner product between two 3×1 vectors
+double lib_gelocus_dot_product(lib_gelocus_Vec3 a, lib_gelocus_Vec3 b);
+
 /// Multiply a 3×3 matrix by a 3×1 vector, returning a 3×1 vector
 lib_gelocus_Vec3 lib_gelocus_multiply_matrix(lib_gelocus_Matrix3 mat, lib_gelocus_Vec3 vec);
 
@@ -140,6 +143,9 @@ lib_gelocus_Vec3 lib_gelocus_multiply_matrix(lib_gelocus_Matrix3 mat, lib_gelocu
 double lib_gelocus_jd_to_jc(double jd);
 
 /// Apply a transformation (between two frames) to a state vector
+///
+/// Any EOP data provided with the vector itself is ignored.
+/// Only the one in the transformation is used.
 ///
 /// \return `true` if the transformation is valid and achieved.
 /// \return `false` if invalid (i.e. origin frame of given [lib_gelocus_Transformation]

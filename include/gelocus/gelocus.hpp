@@ -162,10 +162,6 @@ namespace detail {
 
 // Common
 
-constexpr double jd_to_jc(const double jd) {
-    return (jd - 2451545) / 36525;
-}
-
 // FK5 / IAU-76 Theory
 
 double greenwich_mean_sidereal_time(const double jc_ut1) {
