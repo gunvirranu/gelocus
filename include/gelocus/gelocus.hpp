@@ -1,12 +1,12 @@
 /*
- * gelocus -- Earth-centered reference frames in modern C++
+ * gelocus -- Earth-centered reference frame transformations library
  *
  * "Scientific code that shouldn't feel like it was written by scientists!"
  *
  * Licensed under the MIT License <http://opensource.org/licenses/MIT>.
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) 2021 Gunvir Ranu
+ * Copyright (c) 2021 Gunvir Singh Ranu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -93,9 +93,12 @@ public:
         return vec(i);
     }
 
+// TODO: change to unit test only
+#if DEBUG
     friend std::ostream& operator<<(std::ostream &os, const Position &p) {
         return os << "Position<" << F << "> { " << p(0) << ", " << p(1) << ", " << p(2) << " }";
     }
+#endif
 };
 
 template <Frame From, Frame To>
