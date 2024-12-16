@@ -36,5 +36,3 @@ set_target_properties(
 enable_testing()
 include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
 doctest_discover_tests(test_gelocus)
-
-#message(FATAL_ERROR "onaur")

@@ -124,11 +124,11 @@ typedef struct {
 /// and then use [lib_gelocus_compute_transformation_matrix] to compute the `matrix`.
 /// It can then be later applied to a state vector with [lib_gelocus_apply_transformation].
 typedef struct {
-    double jc;
-    lib_gelocus_Frame   from;
-    lib_gelocus_Frame   to;
-    lib_gelocus_EOPData eop;
-    lib_gelocus_Matrix3 matrix;
+    double jc;                      ///< [julian century] Time stamp
+    lib_gelocus_Frame   from;       ///< Origin reference frame
+    lib_gelocus_Frame   to;         ///< Destination reference frame
+    lib_gelocus_EOPData eop;        ///< EOP correction parameters at this time (if any)
+    lib_gelocus_Matrix3 matrix;     ///< Linear transformation as a 3×3 matrix
 } lib_gelocus_Transformation;
 
 /// Multiply a 3×3 matrix by a 3×1 vector, returning a 3×1 vector
@@ -141,18 +141,23 @@ double lib_gelocus_jd_to_jc(double jd);
 
 /// Apply a transformation (between two frames) to a state vector
 ///
-/// Returns `true` if the transformation is valid and achieved.
-/// Returns `false` if invalid (i.e. origin frame of given [lib_gelocus_Transformation]
+/// \return `true` if the transformation is valid and achieved.
+/// \return `false` if invalid (i.e. origin frame of given [lib_gelocus_Transformation]
 /// does not match frame of [lib_gelocus_StateVector]). This can happen if you mixed up
 /// frames between generating the transformation and applying to a state vector.
 bool lib_gelocus_apply_transformation(
-    lib_gelocus_Transformation trans,
-    lib_gelocus_StateVector sv,
-    lib_gelocus_StateVector * out
+    lib_gelocus_Transformation trans,   ///< Pre-computed transformation between frames
+    lib_gelocus_StateVector sv,         ///< State vector in origin frame, must match `trans.from`
+    lib_gelocus_StateVector * out       ///< State vector in destination frame
 );
 
 /// Transform a state vector in one frame to another
-lib_gelocus_StateVector lib_gelocus_transform(lib_gelocus_StateVector sv, lib_gelocus_Frame to);
+///
+/// \return State vector in destination frame specified by `to`
+lib_gelocus_StateVector lib_gelocus_transform(
+    lib_gelocus_StateVector sv,     ///< State vector in some origin frame
+    lib_gelocus_Frame to            ///< Destination reference frame
+);
 
 /// Generate the 3 x 3 transformation between two frames. It also relies on the time
 /// and the current EOP corrections. The 9-length matrix array contains the row-major
