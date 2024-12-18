@@ -48,3 +48,40 @@ static double greenwich_mean_sidereal_time(const double jc_ut1) {
     }
     return gmst;
 }
+
+///< MOD to J2000
+static void iau76_precession(const double jc, lib_gelocus_Matrix3 * const P) {
+    if (P == NULL)
+    {
+        return;
+    }
+
+    // TODO: explain where #'s came from
+    // All in [arcsecond], uses Horner's method
+    const double zeta_as = jc * (2306.2181 + jc * (0.30188 + jc * 0.017998));
+    const double theta_as = jc * (2004.3109 + jc * (-0.42665 + jc * -0.041833));
+    const double z_as = jc * (2306.2181 + jc * (1.09468 + jc * 0.018203));
+
+    // Convert all from [arcsecond] to [rad]
+    const double zeta = zeta_as * RAD_PER_ARCSEC;
+    const double theta = theta_as * RAD_PER_ARCSEC;
+    const double z = z_as * RAD_PER_ARCSEC;
+
+    const double cos_zeta = cos(zeta);
+    const double sin_zeta = sin(zeta);
+    const double cos_theta = cos(theta);
+    const double sin_theta = sin(theta);
+    const double cos_z = cos(z);
+    const double sin_z = sin(z);
+
+    // TODO: explain rotation choice
+    P->row1.x = cos_zeta * cos_theta * cos_z - sin_zeta * sin_z;
+    P->row1.y = cos_zeta * cos_theta * sin_z + sin_zeta * cos_z;
+    P->row1.z = cos_zeta * sin_theta;
+    P->row2.x = -sin_zeta * cos_theta * cos_z - cos_zeta * sin_z;
+    P->row2.y = -sin_zeta * cos_theta * sin_z + cos_zeta * cos_z;
+    P->row2.z = -sin_zeta * sin_theta;
+    P->row3.x = -sin_theta * cos_z;
+    P->row3.y = -sin_theta * sin_z;
+    P->row3.z = cos_theta;
+}
