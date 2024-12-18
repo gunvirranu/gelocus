@@ -30,47 +30,21 @@
 #include "gelocus/gelocus.h"
 
 #include <stddef.h>
+#include <math.h>
 
 #include "common_private.h"
 
-double lib_gelocus_dot_product(const lib_gelocus_Vec3 a, const lib_gelocus_Vec3 b)
-{
-    return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
-}
+// FK5 / IAU-76 Theory
 
-lib_gelocus_Vec3 lib_gelocus_multiply_matrix(
-    const lib_gelocus_Matrix3 mat,
-    const lib_gelocus_Vec3 vec
-) {
-    lib_gelocus_Vec3 out = { 0 };
-    out.x = lib_gelocus_dot_product(mat.row1, vec);
-    out.y = lib_gelocus_dot_product(mat.row2, vec);
-    out.z = lib_gelocus_dot_product(mat.row3, vec);
-    return out;
-}
-
-double lib_gelocus_jd_to_jc(const double jd)
-{
-    return (jd - 2451545.0) / 36525.0;
-}
-
-bool lib_gelocus_apply_transformation(
-    const lib_gelocus_Transformation trans,
-    const lib_gelocus_StateVector sv,
-    lib_gelocus_StateVector * const out
-) {
-    if ((out == NULL) || (trans.from != sv.frame))
-    {
-        return false;
+static double greenwich_mean_sidereal_time(const double jc_ut1) {
+    static const double cs[] = {
+            67310.54841, 876600.0 * 3600 + 8640184.812866, 0.093104, -6.2e-6
+    };
+    // Horner's method for polynomial evaluation
+    const double gmst_secs = cs[0] + jc_ut1 * (cs[1] + jc_ut1 * (cs[2] + jc_ut1 * cs[3]));
+    double gmst = fmod(deg_to_rad(gmst_secs / 240), 2 * PI);
+    if (gmst < 0) {
+        gmst += 2 * PI;
     }
-
-    // Apply linear transformation
-    out->pos = lib_gelocus_multiply_matrix(trans.matrix, sv.pos);
-    /// FIXME: also do out->vel
-
-    // Copy over stuff that doesn't change
-    out->jc = sv.jc;
-    out->frame = trans.to;
-    out->eop = trans.eop;
-    return true;
+    return gmst;
 }

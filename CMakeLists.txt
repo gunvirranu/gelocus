@@ -45,7 +45,7 @@ endif()
 # Declare library and specify source files
 add_library(
     gelocus
-    src/gelocus.c
+    src/gelocus.c src/iau_76.c
 )
 
 # Include directory

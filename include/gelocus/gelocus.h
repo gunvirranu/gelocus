@@ -97,8 +97,9 @@ typedef struct {
     double yp;      ///< [rad]
     double dPsi;
     double dEps;
+    // Not used for IAU-76/FK5 transformations
     double dX;
-    double dY;      ///< Not used for IAU-76/FK5 transformations
+    double dY;
 } lib_gelocus_EOPData;
 
 /// Space State Vector
