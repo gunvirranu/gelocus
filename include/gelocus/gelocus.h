@@ -33,10 +33,10 @@
 #include <stdbool.h>
 
 // TODO: explain J2000 epoch meaning
-const double LIB_GELOCUS_EPOCH_J2000_JD = 2451545.0;      ///< [julian date]    Time stamp of J2000 epoch
-const double LIB_GELOCUS_EPOCH_J2000_JC = 0.0;            ///< [julian century] Time stamp of J2000 epoch
-const double LIB_GELOCUS_DELTA_JD_PER_DAY = 1.0;          ///< [julian date]    Delta per 24 hour day
-const double LIB_GELOCUS_DELTA_JC_PER_DAY = 1.0 / 36525;  ///< [julian century] Delta per 24 hour day
+extern const double LIB_GELOCUS_EPOCH_J2000_JD;     ///< [julian date]    Time stamp of J2000 epoch
+extern const double LIB_GELOCUS_EPOCH_J2000_JC;     ///< [julian century] Time stamp of J2000 epoch
+extern const double LIB_GELOCUS_DELTA_JD_PER_DAY;   ///< [julian date]    Delta per 24 hour day
+extern const double LIB_GELOCUS_DELTA_JC_PER_DAY;   ///< [julian century] Delta per 24 hour day
 
 /// A 3-dimensional vector
 typedef struct {

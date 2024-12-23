@@ -34,6 +34,11 @@
 
 #include "common_private.h"
 
+const double LIB_GELOCUS_EPOCH_J2000_JD = 2451545.0;
+const double LIB_GELOCUS_EPOCH_J2000_JC = 0.0;
+const double LIB_GELOCUS_DELTA_JD_PER_DAY = 1.0;
+const double LIB_GELOCUS_DELTA_JC_PER_DAY = 1.0 / 36525;
+
 double lib_gelocus_vec_norm(const lib_gelocus_Vec3 x)
 {
     return sqrt(lib_gelocus_dot_product(x, x));
