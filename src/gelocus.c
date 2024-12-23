@@ -30,8 +30,14 @@
 #include "gelocus/gelocus.h"
 
 #include <stddef.h>
+#include <math.h>
 
 #include "common_private.h"
+
+double lib_gelocus_vec_norm(const lib_gelocus_Vec3 x)
+{
+    return sqrt(lib_gelocus_dot_product(x, x));
+}
 
 double lib_gelocus_dot_product(const lib_gelocus_Vec3 a, const lib_gelocus_Vec3 b)
 {

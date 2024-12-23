@@ -132,6 +132,9 @@ typedef struct {
     lib_gelocus_Matrix3 matrix;     ///< Linear transformation as a 3×3 matrix
 } lib_gelocus_Transformation;
 
+/// Vector norm
+double lib_gelocus_vec_norm(lib_gelocus_Vec3 x);
+
 /// Dot/inner product between two 3×1 vectors
 double lib_gelocus_dot_product(lib_gelocus_Vec3 a, lib_gelocus_Vec3 b);
 
