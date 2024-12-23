@@ -52,8 +52,7 @@
       }
     },
     {
-      "name": "ci-win64",
-      "hidden": true,
+      "name": "ci-windows",
       "inherits": ["ci-std"],
       "generator": "Visual Studio 17 2022",
       "architecture": "x64",
@@ -68,10 +67,6 @@
     {
       "name": "ci-ubuntu",
       "inherits": ["ci-unix"]
-    },
-    {
-      "name": "ci-windows",
-      "inherits": ["ci-win64"]
     },
     {
       "name": "ci-lint",
@@ -92,7 +87,7 @@
   ],
   "testPresets": [
     {
-      "name": "dev",
+      "name": "dev-unix",
       "configurePreset": "dev-unix",
       "configuration": "Debug",
       "output": {
