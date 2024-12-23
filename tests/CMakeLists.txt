@@ -8,13 +8,16 @@ if(DEFINED CMAKE_CXX_CLANG_TIDY)
     set(CMAKE_CXX_CLANG_TIDY "")
 endif()
 
-include(FetchContent)
-FetchContent_Declare(
-    doctest
-    GIT_REPOSITORY "https://github.com/gunvirranu/doctest"
-    GIT_TAG "v2.4.12-gunvirranu"
-)
-FetchContent_MakeAvailable(doctest)
+# TODO: Temp swap with local
+add_subdirectory(../../doctest ../build/doctest)
+#
+# include(FetchContent)
+# FetchContent_Declare(
+#     doctest
+#     GIT_REPOSITORY "https://github.com/gunvirranu/doctest"
+#     GIT_TAG "v2.4.12-gunvirranu"
+# )
+# FetchContent_MakeAvailable(doctest)
 
 add_executable(test_gelocus test_gelocus.cpp)
 target_link_libraries(test_gelocus PRIVATE gelocus doctest)
