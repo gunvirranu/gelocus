@@ -30,6 +30,25 @@ TEST_CASE("test_constants")
     CHECK(jc_next_day == (LIB_GELOCUS_EPOCH_J2000_JC + LIB_GELOCUS_DELTA_JC_PER_DAY));
 }
 
+TEST_CASE("test_vec_norm")
+{
+    // Check default is 0
+    Vec3 x = { 0 };
+    CHECK(lib_gelocus_vec_norm(x) == 0);
+
+    // Check basic pythagorean quadruple
+    x = { 4, 13, 16 };
+    CHECK(lib_gelocus_vec_norm(x) == 21);
+
+    // Check norm is unchanged by negatives
+    x = { -4, 13, -16 };
+    CHECK(lib_gelocus_vec_norm(x) == 21);
+
+    // Check all negatives and some floating point
+    x = { -2, -3, -4 };
+    CHECK(lib_gelocus_vec_norm(x) == Approx(5.3851648071).epsilon(1e-10));
+}
+
 TEST_CASE("test_dot_product")
 {
     Vec3 a = { 0 };
