@@ -5,10 +5,20 @@ extern "C" {
 #  include <gelocus/gelocus.h>
 };
 
+using doctest::Approx;
+
 // Save some typing
 #define jd_to_jc                lib_gelocus_jd_to_jc
 typedef lib_gelocus_Vec3        Vec3;
-typedef lib_gelocus_Matrix3     Matrix3x3;
+typedef lib_gelocus_Matrix3     Matrix3;
+
+/// Useful macro to check `Vec3` equality
+#define CHECK_VEC(lhs, rhs, eps) \
+    do { \
+        CHECK(lhs.x == Approx(rhs.x).epsilon(eps)); \
+        CHECK(lhs.y == Approx(rhs.y).epsilon(eps)); \
+        CHECK(lhs.z == Approx(rhs.z).epsilon(eps)); \
+    } while (false)
 
 TEST_CASE("test_constants")
 {
@@ -44,7 +54,41 @@ TEST_CASE("test_dot_product")
 
 TEST_CASE("test_multiply_matrix")
 {
+    Matrix3 A = { 0 };
+       Vec3 x = { 0 };
+       Vec3 b = { 0 };
+       Vec3 truth = { 0 };
 
+    // Check default values are all 0
+    b = lib_gelocus_multiply_matrix(A, x);
+    CHECK_VEC(b, truth, 1e-30);
+
+    // Check identity matrix does nothing
+    A = { .row1 = { 1, 0, 0 },
+          .row2 = { 0, 1, 0 },
+          .row3 = { 0, 0, 1 } };
+    x = { 7, -3, 12 };
+    b = lib_gelocus_multiply_matrix(A, x);
+    truth = x;
+    CHECK_VEC(b, truth, 1e-30);
+
+    // Check axes shuffling
+    A = { .row1 = { 0,  0, -1 },
+          .row2 = { 1,  0,  0 },
+          .row3 = { 0, -1,  0 } };
+    x = { -5, 9, 4 };
+    b = lib_gelocus_multiply_matrix(A, x);
+    truth = { -4, -5, -9 };
+    CHECK_VEC(b, truth, 1e-30);
+
+    // Test some random rotation matrix
+    A = { .row1 = {  0.87559502, -0.2385524 ,  0.42003109 },
+          .row2 = {  0.29597008,  0.95215193, -0.07621294 },
+          .row3 = { -0.38175263,  0.19104831,  0.90430386 } };
+    x = { 197.09117549, 51.11557365, 230.36351425 };
+    b = lib_gelocus_multiply_matrix(A, x);
+    truth = { 257.13814674, 89.44620389, 142.84408326 };  // Via faith in NumPy
+    CHECK_VEC(b, truth, 1e-7);
 }
 
 TEST_CASE("test_jd_to_jc")
