@@ -28,6 +28,12 @@ TEST_CASE("test_constants")
     // Check 1 day delta in julian date is same as in julian century
     const double jc_next_day = lib_gelocus_jd_to_jc(LIB_GELOCUS_EPOCH_J2000_JD + LIB_GELOCUS_DELTA_JD_PER_DAY);
     CHECK(jc_next_day == (LIB_GELOCUS_EPOCH_J2000_JC + LIB_GELOCUS_DELTA_JC_PER_DAY));
+
+    // Check J1900 epoch is roughly -1 centuries back from J2000
+    CHECK(jd_to_jc(LIB_GELOCUS_EPOCH_J1900_JD) == Approx(-1).epsilon(1e-4));
+
+    // Check GPS epoch (~1980) roughly matches fractional centuries
+    CHECK(jd_to_jc(LIB_GELOCUS_EPOCH_GPS_JD) == Approx(-0.2).epsilon(1e-3));
 }
 
 TEST_CASE("test_vec_norm")

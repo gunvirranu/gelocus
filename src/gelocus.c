@@ -35,7 +35,11 @@
 #include "common_private.h"
 
 const double LIB_GELOCUS_EPOCH_J2000_JD = 2451545.0;
+const double LIB_GELOCUS_EPOCH_J1900_JD = 2415021.0;
+const double LIB_GELOCUS_EPOCH_GPS_JD   = 2444244.5;
+
 const double LIB_GELOCUS_EPOCH_J2000_JC = 0.0;
+
 const double LIB_GELOCUS_DELTA_JD_PER_DAY = 1.0;
 const double LIB_GELOCUS_DELTA_JC_PER_DAY = 1.0 / 36525;
 

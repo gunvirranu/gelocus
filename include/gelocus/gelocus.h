@@ -32,11 +32,14 @@
 
 #include <stdbool.h>
 
-// TODO: explain J2000 epoch meaning
-extern const double LIB_GELOCUS_EPOCH_J2000_JD;     ///< [julian date]    Time stamp of J2000 epoch
+extern const double LIB_GELOCUS_EPOCH_J2000_JD;     ///< [julian date] Time stamp of J2000 epoch (Jan 1, 2000  12:00:00.000 TT)
+extern const double LIB_GELOCUS_EPOCH_J1900_JD;     ///< [julian date] Time stamp of J1900 epoch (Jan 1, 1900  12:00:00.000 UT1)
+extern const double LIB_GELOCUS_EPOCH_GPS_JD;       ///< [julian date] Time stamp of GPS epoch   (Jan 6, 1980  00:00:00.000 UTC)
+
 extern const double LIB_GELOCUS_EPOCH_J2000_JC;     ///< [julian century] Time stamp of J2000 epoch
-extern const double LIB_GELOCUS_DELTA_JD_PER_DAY;   ///< [julian date]    Delta per 24 hour day
-extern const double LIB_GELOCUS_DELTA_JC_PER_DAY;   ///< [julian century] Delta per 24 hour day
+
+extern const double LIB_GELOCUS_DELTA_JD_PER_DAY;   ///< [julian date / day]    Delta per 24 hour day
+extern const double LIB_GELOCUS_DELTA_JC_PER_DAY;   ///< [julian century / day] Delta per 24 hour day
 
 /// A 3-dimensional vector
 typedef struct {
@@ -112,6 +115,7 @@ typedef struct {
     lib_gelocus_Vec3    pos;    ///< [km] Position vector
     lib_gelocus_Vec3    vel;    ///< [km/s] Velocity vector
     lib_gelocus_Frame   frame;  ///< Reference frame which coordinates are relative to
+    // TODO: Is there a way to avoid copying around, pointer perhaps?
     lib_gelocus_EOPData eop;    ///< EOP correction parameters at this time (if any)
 } lib_gelocus_StateVector;
 
@@ -141,10 +145,13 @@ double lib_gelocus_dot_product(lib_gelocus_Vec3 a, lib_gelocus_Vec3 b);
 /// Multiply a 3×3 matrix by a 3×1 vector, returning a 3×1 vector
 lib_gelocus_Vec3 lib_gelocus_multiply_matrix(lib_gelocus_Matrix3 mat, lib_gelocus_Vec3 vec);
 
-/// Convert a [julian date] to a [julian century].
+/// Convert a [julian date] to a [julian century]
 ///
-/// TODO: consider sanity check on conversion?
-double lib_gelocus_jd_to_jc(double jd);
+/// This relation applies regardless of the time scale (i.e. UTC, UT1, TT, etc).
+/// \return [julian century] Fractional centuries as n offset relative to J2000 epoch
+double lib_gelocus_jd_to_jc(
+    double jd  ///< [julian date] Number of days since Jan 1, 4713 BC  12:00
+);
 
 /// Apply a transformation (between two frames) to a state vector
 ///
@@ -152,13 +159,13 @@ double lib_gelocus_jd_to_jc(double jd);
 /// Only the one in the transformation is used.
 ///
 /// \return `true` if the transformation is valid and achieved.
-/// \return `false` if invalid (i.e. origin frame of given [lib_gelocus_Transformation]
-/// does not match frame of [lib_gelocus_StateVector]). This can happen if you mixed up
-/// frames between generating the transformation and applying to a state vector.
+///         `false` if `out` is `NULL` or origin frame of given [lib_gelocus_Transformation]
+///         does not match frame of [lib_gelocus_StateVector]). This can happen if you mixed up
+///         frames between generating the transformation and applying to a state vector.
 bool lib_gelocus_apply_transformation(
     lib_gelocus_Transformation trans,   ///< Pre-computed transformation between frames
     lib_gelocus_StateVector sv,         ///< State vector in origin frame, must match `trans.from`
-    lib_gelocus_StateVector * out       ///< State vector in destination frame
+    lib_gelocus_StateVector * out       ///< State vector in destination frame, should not be NULL
 );
 
 /// Transform a state vector in one frame to another
