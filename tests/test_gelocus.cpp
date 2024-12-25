@@ -8,7 +8,6 @@ extern "C" {
 using doctest::Approx;
 
 // Save some typing
-#define jd_to_jc                lib_gelocus_jd_to_jc
 typedef lib_gelocus_Vec3        Vec3;
 typedef lib_gelocus_Matrix3     Matrix3;
 
@@ -23,17 +22,20 @@ typedef lib_gelocus_Matrix3     Matrix3;
 TEST_CASE("test_constants")
 {
     // Check J2000 epochs in julian date and julian century are the same
-    CHECK(jd_to_jc(LIB_GELOCUS_EPOCH_J2000_JD) == LIB_GELOCUS_EPOCH_J2000_JC);
+    CHECK(lib_gelocus_jd_to_jc(LIB_GELOCUS_EPOCH_J2000_JD) == LIB_GELOCUS_EPOCH_J2000_JC);
 
     // Check 1 day delta in julian date is same as in julian century
     const double jc_next_day = lib_gelocus_jd_to_jc(LIB_GELOCUS_EPOCH_J2000_JD + LIB_GELOCUS_DELTA_JD_PER_DAY);
     CHECK(jc_next_day == (LIB_GELOCUS_EPOCH_J2000_JC + LIB_GELOCUS_DELTA_JC_PER_DAY));
 
     // Check J1900 epoch is roughly -1 centuries back from J2000
-    CHECK(jd_to_jc(LIB_GELOCUS_EPOCH_J1900_JD) == Approx(-1).epsilon(1e-4));
+    CHECK(lib_gelocus_jd_to_jc(LIB_GELOCUS_EPOCH_J1900_JD) == Approx(-1).epsilon(1e-4));
 
     // Check GPS epoch (~1980) roughly matches fractional centuries
-    CHECK(jd_to_jc(LIB_GELOCUS_EPOCH_GPS_JD) == Approx(-0.2).epsilon(1e-3));
+    CHECK(lib_gelocus_jd_to_jc(LIB_GELOCUS_EPOCH_GPS_JD) == Approx(-0.2).epsilon(1e-3));
+
+    // Check day and JC per day are inverses
+    CHECK((1 / LIB_GELOCUS_DELTA_JC_PER_DAY) == Approx(LIB_GELOCUS_DELTA_DAY_PER_JC).epsilon(1e-20));
 }
 
 TEST_CASE("test_vec_norm")
@@ -118,7 +120,26 @@ TEST_CASE("test_multiply_matrix")
 
 TEST_CASE("test_jd_to_jc")
 {
+    // Vallado Example 3-5
+    CHECK(lib_gelocus_jd_to_jc(2448855.009722) == Approx(-0.073647919).epsilon(1e-8));
 
+    // Vallado Example 3-7
+    CHECK(lib_gelocus_jd_to_jc(2453140.19727065) == Approx(0.043674121031).epsilon(1e-12));
+
+    // Vallado Example 3-7
+    CHECK(lib_gelocus_jd_to_jc(2453140.196522415) == Approx(0.043671100545).epsilon(1e-4));
+}
+
+TEST_CASE("test_jd_frac_to_jc")
+{
+    // Vallado Example 3-5
+    CHECK(lib_gelocus_jd_frac_to_jc(2448855, 0.009722) == Approx(-0.073647919).epsilon(1e-9));
+
+    // Vallado Example 3-7
+    CHECK(lib_gelocus_jd_frac_to_jc(2453140, 0.19727065) == Approx(0.043674121031).epsilon(1e-12));
+
+    // Vallado Example 3-7
+    CHECK(lib_gelocus_jd_frac_to_jc(2453140, 0.196522415) == Approx(0.043671100545).epsilon(1e-5));
 }
 
 TEST_CASE("test_apply_transformation")

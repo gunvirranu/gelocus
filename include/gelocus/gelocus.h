@@ -40,6 +40,7 @@ extern const double LIB_GELOCUS_EPOCH_J2000_JC;     ///< [julian century] Time s
 
 extern const double LIB_GELOCUS_DELTA_JD_PER_DAY;   ///< [julian date / day]    Delta per 24 hour day
 extern const double LIB_GELOCUS_DELTA_JC_PER_DAY;   ///< [julian century / day] Delta per 24 hour day
+extern const double LIB_GELOCUS_DELTA_DAY_PER_JC;   ///< [day / julian century] Number of days per julian century
 
 /// A 3-dimensional vector
 typedef struct {
@@ -96,10 +97,10 @@ typedef enum {
 /// They are published by external sources and improve accuracy of conversions.
 /// You may leave them as default (all 0) if you don't wish to provide these updates.
 typedef struct {
-    double xp;      ///< [rad]
-    double yp;      ///< [rad]
-    double dPsi;
-    double dEps;
+    double xp;      ///< [rad] Polar motion angle
+    double yp;      ///< [rad] Polar motion angle
+    double dPsi;    ///< [rad] Nutation correction angle
+    double dEps;    ///< [rad] Nutation correction angle
     // Not used for IAU-76/FK5 transformations
     double dX;
     double dY;
@@ -148,9 +149,18 @@ lib_gelocus_Vec3 lib_gelocus_multiply_matrix(lib_gelocus_Matrix3 mat, lib_gelocu
 /// Convert a [julian date] to a [julian century]
 ///
 /// This relation applies regardless of the time scale (i.e. UTC, UT1, TT, etc).
-/// \return [julian century] Fractional centuries as n offset relative to J2000 epoch
+/// \return [julian century] Fractional centuries as offset relative to J2000 epoch
 double lib_gelocus_jd_to_jc(
     double jd  ///< [julian date] Number of days since Jan 1, 4713 BC  12:00
+);
+
+/// Convert a high-precision [julian date] to a [julian century]
+///
+/// Accepts a pair of julian dates for preserving high accuracy time offsets.
+/// \return [julian century] Fractional centuries as offset relative to J2000 epoch
+double lib_gelocus_jd_frac_to_jc(
+    double jd,      ///< [julian date] Number of integer days since Jan 1, 4713 BC  12:00
+    double jd_frac  ///< [julian date] Small fractional day portion for higher accuracy
 );
 
 /// Apply a transformation (between two frames) to a state vector
@@ -163,9 +173,9 @@ double lib_gelocus_jd_to_jc(
 ///         does not match frame of [lib_gelocus_StateVector]). This can happen if you mixed up
 ///         frames between generating the transformation and applying to a state vector.
 bool lib_gelocus_apply_transformation(
-    lib_gelocus_Transformation trans,   ///< Pre-computed transformation between frames
-    lib_gelocus_StateVector sv,         ///< State vector in origin frame, must match `trans.from`
-    lib_gelocus_StateVector * out       ///< State vector in destination frame, should not be NULL
+    lib_gelocus_Transformation  trans,  ///< Pre-computed transformation between frames
+    lib_gelocus_StateVector     sv,     ///< State vector in origin frame, must match `trans.from`
+    lib_gelocus_StateVector   * out     ///< State vector in destination frame, should not be NULL
 );
 
 /// Transform a state vector in one frame to another
@@ -173,7 +183,7 @@ bool lib_gelocus_apply_transformation(
 /// \return State vector in destination frame specified by `to`
 lib_gelocus_StateVector lib_gelocus_transform(
     lib_gelocus_StateVector sv,     ///< State vector in some origin frame
-    lib_gelocus_Frame to            ///< Destination reference frame
+    lib_gelocus_Frame       to      ///< Destination reference frame
 );
 
 /// Generate the 3 x 3 transformation between two frames. It also relies on the time

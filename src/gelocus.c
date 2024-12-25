@@ -42,6 +42,7 @@ const double LIB_GELOCUS_EPOCH_J2000_JC = 0.0;
 
 const double LIB_GELOCUS_DELTA_JD_PER_DAY = 1.0;
 const double LIB_GELOCUS_DELTA_JC_PER_DAY = 1.0 / 36525;
+const double LIB_GELOCUS_DELTA_DAY_PER_JC = 36525;
 
 double lib_gelocus_vec_norm(const lib_gelocus_Vec3 x)
 {
@@ -66,7 +67,13 @@ lib_gelocus_Vec3 lib_gelocus_multiply_matrix(
 
 double lib_gelocus_jd_to_jc(const double jd)
 {
-    return (jd - 2451545.0) / 36525.0;
+    return (jd - LIB_GELOCUS_EPOCH_J2000_JD) / LIB_GELOCUS_DELTA_DAY_PER_JC;
+}
+
+double lib_gelocus_jd_frac_to_jc(const double jd, const double jd_frac)
+{
+    const double delta_jd = (jd - LIB_GELOCUS_EPOCH_J2000_JD) + jd_frac;
+    return delta_jd / LIB_GELOCUS_DELTA_DAY_PER_JC;
 }
 
 bool lib_gelocus_apply_transformation(
