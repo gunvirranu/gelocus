@@ -44,6 +44,12 @@ const double LIB_GELOCUS_DELTA_JD_PER_DAY = 1.0;
 const double LIB_GELOCUS_DELTA_JC_PER_DAY = 1.0 / 36525;
 const double LIB_GELOCUS_DELTA_DAY_PER_JC = 36525;
 
+const lib_gelocus_Matrix3 LIB_GELOCUS_MATRIX_IDENTITY = {
+    .row1 = { 1, 0, 0 },
+    .row2 = { 0, 1, 0 },
+    .row3 = { 0, 0, 1 }
+};
+
 double lib_gelocus_vec_norm(const lib_gelocus_Vec3 x)
 {
     return sqrt(lib_gelocus_dot_product(x, x));
@@ -81,7 +87,11 @@ bool lib_gelocus_apply_transformation(
     const lib_gelocus_StateVector sv,
     lib_gelocus_StateVector * const out
 ) {
-    if ((out == NULL) || (trans.from != sv.frame))
+    const bool is_bad_ptr = (out == NULL);
+    const bool is_bad_frame = (trans.from != sv.frame);
+    const bool is_bad_time = (trans.jc != sv.jc);
+
+    if (is_bad_ptr || is_bad_frame || is_bad_time)
     {
         return false;
     }

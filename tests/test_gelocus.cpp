@@ -36,6 +36,17 @@ TEST_CASE("test_constants")
 
     // Check day and JC per day are inverses
     CHECK((1 / LIB_GELOCUS_DELTA_JC_PER_DAY) == Approx(LIB_GELOCUS_DELTA_DAY_PER_JC).epsilon(1e-20));
+
+    // Check identity matrix elements
+    CHECK(LIB_GELOCUS_MATRIX_IDENTITY.row1.x == 1);
+    CHECK(LIB_GELOCUS_MATRIX_IDENTITY.row1.y == 0);
+    CHECK(LIB_GELOCUS_MATRIX_IDENTITY.row1.z == 0);
+    CHECK(LIB_GELOCUS_MATRIX_IDENTITY.row2.x == 0);
+    CHECK(LIB_GELOCUS_MATRIX_IDENTITY.row2.y == 1);
+    CHECK(LIB_GELOCUS_MATRIX_IDENTITY.row2.z == 0);
+    CHECK(LIB_GELOCUS_MATRIX_IDENTITY.row3.x == 0);
+    CHECK(LIB_GELOCUS_MATRIX_IDENTITY.row3.y == 0);
+    CHECK(LIB_GELOCUS_MATRIX_IDENTITY.row3.z == 1);
 }
 
 TEST_CASE("test_vec_norm")
@@ -91,9 +102,7 @@ TEST_CASE("test_multiply_matrix")
     CHECK_VEC(b, truth, 1e-30);
 
     // Check identity matrix does nothing
-    A = { .row1 = { 1, 0, 0 },
-          .row2 = { 0, 1, 0 },
-          .row3 = { 0, 0, 1 } };
+    A = LIB_GELOCUS_MATRIX_IDENTITY;
     x = { 7, -3, 12 };
     b = lib_gelocus_multiply_matrix(A, x);
     truth = x;
@@ -144,15 +153,54 @@ TEST_CASE("test_jd_frac_to_jc")
 
 TEST_CASE("test_apply_transformation")
 {
+    lib_gelocus_Transformation trans = {
+        .jc = LIB_GELOCUS_EPOCH_J2000_JC,
+        .from = LIB_GELOCUS_FRAME_J2000,
+        .to   = LIB_GELOCUS_FRAME_ECEF,
+        .matrix = LIB_GELOCUS_MATRIX_IDENTITY,
+        .eop = { 0 },
+    };
+    lib_gelocus_StateVector in = {
+        .jc = LIB_GELOCUS_EPOCH_J2000_JC,
+        .pos = { 7, 8, 9 },
+        .vel = { 0, 0, 0 },
+        .frame = LIB_GELOCUS_FRAME_J2000,
+        .eop = { 0 },
+    };
+    lib_gelocus_StateVector out = { 0 };
+    Vec3 vec = { 0 };
 
+    // Verify no work if NULL pointer
+    CHECK_FALSE(lib_gelocus_apply_transformation(trans, in, NULL));
+
+    // Verify no work if from/to frames are the same
+    in.frame = LIB_GELOCUS_FRAME_ECEF;
+    CHECK_FALSE(lib_gelocus_apply_transformation(trans, in, &out));
+    CHECK_VEC(out.pos, vec, 1e-20);  // Verify `out` vector is untouched
+    in.frame = LIB_GELOCUS_FRAME_J2000;
+
+    // Verify no work if timestamp mismatch
+    in.jc += (100 * LIB_GELOCUS_DELTA_JC_PER_DAY);
+    CHECK_FALSE(lib_gelocus_apply_transformation(trans, in, &out));
+    CHECK_VEC(out.pos, vec, 1e-20);  // Verify `out` vector is untouched
+    in.jc = LIB_GELOCUS_EPOCH_J2000_JC;
+
+    // Check identity transformation is applied if conditions correct
+    CHECK(lib_gelocus_apply_transformation(trans, in, &out));
+    CHECK(out.jc == LIB_GELOCUS_EPOCH_J2000_JC);
+    vec = in.pos;
+    CHECK_VEC(out.pos, vec, 1e-20);
+    CHECK(out.frame == trans.to);
+
+    // TODO: test case to confirm transformation EOP is used and not vector
 }
 
-TEST_CASE("test_transform")
+TEST_CASE("test_transform" * doctest::skip())
 {
 
 }
 
-TEST_CASE("test_compute_transformation_matrix")
+TEST_CASE("test_compute_transformation_matrix" * doctest::skip())
 {
 
 }

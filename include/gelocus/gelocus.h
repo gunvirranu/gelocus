@@ -66,6 +66,8 @@ typedef struct {
     lib_gelocus_Vec3 row3;  ///< Row 3 of 3×3 matrix, indices [2, i]
 } lib_gelocus_Matrix3;
 
+extern const lib_gelocus_Matrix3 LIB_GELOCUS_MATRIX_IDENTITY;  ///< 3×3 identity matrix
+
 /// Reference Frames
 ///
 /// A reference frame defines coordinates on the affine space that is actual space.
@@ -83,7 +85,7 @@ typedef struct {
 /// to the external universe) and the ECEF frame (which is fixed to Earth's surface)
 /// changes as the Earth rotates.
 typedef enum {
-    LIB_GELOCUS_FRAME_J200,     ///< ECU: Earth-Centered Inertial fixed to the J2000 epoch
+    LIB_GELOCUS_FRAME_J2000,    ///< ECU: Earth-Centered Inertial fixed to the J2000 epoch
     LIB_GELOCUS_FRAME_MOD,      ///< MOD: Mean of Date (precession applied)
     LIB_GELOCUS_FRAME_TOD,      ///< TOD: True of Data (nutation applied)
     LIB_GELOCUS_FRAME_TEME,     ///< TEME: True Equator Mean Equinox, used only for SGP4
@@ -133,8 +135,8 @@ typedef struct {
     double jc;                      ///< [julian century] Time stamp
     lib_gelocus_Frame   from;       ///< Origin reference frame
     lib_gelocus_Frame   to;         ///< Destination reference frame
-    lib_gelocus_EOPData eop;        ///< EOP correction parameters at this time (if any)
     lib_gelocus_Matrix3 matrix;     ///< Linear transformation as a 3×3 matrix
+    lib_gelocus_EOPData eop;        ///< EOP correction parameters at this time (if any)
 } lib_gelocus_Transformation;
 
 /// Vector norm
@@ -163,15 +165,20 @@ double lib_gelocus_jd_frac_to_jc(
     double jd_frac  ///< [julian date] Small fractional day portion for higher accuracy
 );
 
-/// Apply a transformation (between two frames) to a state vector
+/// Apply a transformation between two frames to a state vector
 ///
-/// Any EOP data provided with the vector itself is ignored.
-/// Only the one in the transformation is used.
+/// The [lib_gelocus_EOPData] data provided with the [lib_gelocus_StateVector] itself is ignored.
+/// Only that in the [lib_gelocus_Transformation] is used. Similarly, the timestamp (`jc`) of
+/// the [lib_gelocus_Transformation] and [lib_gelocus_StateVector] are cross-checked to confirm
+/// they're the same.
 ///
-/// \return `true` if the transformation is valid and achieved.
-///         `false` if `out` is `NULL` or origin frame of given [lib_gelocus_Transformation]
-///         does not match frame of [lib_gelocus_StateVector]). This can happen if you mixed up
-///         frames between generating the transformation and applying to a state vector.
+/// \return `true` if the transformation is valid and returned in `out`
+/// \return `false` if any of the following are true:
+///           - `out` is `NULL`
+///           - Origin frame of given [lib_gelocus_Transformation] does not match frame of
+///             frame of [lib_gelocus_StateVector]. This can happen if you mixed up frames
+///             between generating the transformation and applying to a state vector.
+///           - Timestamp of [lib_gelocus_Transformation] doesnt match [lib_gelocus_StateVector]
 bool lib_gelocus_apply_transformation(
     lib_gelocus_Transformation  trans,  ///< Pre-computed transformation between frames
     lib_gelocus_StateVector     sv,     ///< State vector in origin frame, must match `trans.from`
