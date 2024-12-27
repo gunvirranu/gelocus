@@ -157,17 +157,17 @@ TEST_CASE("test_apply_transformation")
         .jc = LIB_GELOCUS_EPOCH_J2000_JC,
         .from = LIB_GELOCUS_FRAME_J2000,
         .to   = LIB_GELOCUS_FRAME_ECEF,
-        .matrix = LIB_GELOCUS_MATRIX_IDENTITY,
         .eop = {
             .dPsi = 0.01,
         },
+        .matrix = LIB_GELOCUS_MATRIX_IDENTITY,
     };
     lib_gelocus_StateVector in = {
         .jc = LIB_GELOCUS_EPOCH_J2000_JC,
         .pos = { 7, 8, 9 },
         .vel = { 0, 0, 0 },
-        .frame = LIB_GELOCUS_FRAME_J2000,
         .eop = { 0 },
+        .frame = LIB_GELOCUS_FRAME_J2000,
     };
     lib_gelocus_StateVector out = { 0 };
     Vec3 vec = { 0 };
@@ -208,9 +208,22 @@ TEST_CASE("test_apply_transformation")
     CHECK_VEC(out.pos, vec, 1e-20);
 }
 
-TEST_CASE("test_transform" * doctest::skip())
+TEST_CASE("test_transform")
 {
+    lib_gelocus_StateVector in = {
+        .jc = LIB_GELOCUS_EPOCH_J2000_JC,
+        .pos = { 300, 200, 400 },
+        .vel = { 0, 0, 0 },
+        .eop = { 0 },
+        .frame = LIB_GELOCUS_FRAME_J2000,
+    };
 
+    // Verify output frame and timestamp make sense
+    const lib_gelocus_StateVector out = lib_gelocus_transform(in, LIB_GELOCUS_FRAME_ECEF);
+    CHECK(out.frame == LIB_GELOCUS_FRAME_ECEF);
+    CHECK(out.jc == in.jc);
+
+    // TODO: test actual transformation values
 }
 
 TEST_CASE("test_compute_transformation_matrix" * doctest::skip())

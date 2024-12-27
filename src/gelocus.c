@@ -101,8 +101,35 @@ bool lib_gelocus_apply_transformation(
     /// FIXME: also do out->vel
 
     // Copy over stuff that doesn't change
-    out->jc = sv.jc;
     out->frame = trans.to;
+    out->jc = sv.jc;
     out->eop = trans.eop;
     return true;
+}
+
+lib_gelocus_StateVector lib_gelocus_transform(
+    const lib_gelocus_StateVector sv,
+    const lib_gelocus_Frame to
+) {
+    // Set up transformation given input state vector
+    lib_gelocus_Transformation trans = {
+        .jc     = sv.jc,
+        .from   = sv.frame,
+        .to     = to,
+        .eop    = sv.eop,
+        .matrix = { 0 },
+    };
+    // Compute transformation matrix
+    lib_gelocus_compute_transformation_matrix(&trans);
+
+    lib_gelocus_StateVector out = { 0 };
+    const bool is_err = lib_gelocus_apply_transformation(trans, sv, &out);
+    // We know none of the errors above are actually possible
+    UNUSED(is_err);
+    return out;
+}
+
+void lib_gelocus_compute_transformation_matrix(lib_gelocus_Transformation * trans)
+{
+
 }

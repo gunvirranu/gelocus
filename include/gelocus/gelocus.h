@@ -117,9 +117,9 @@ typedef struct {
     double jc;                  ///< [julian century] Time stamp
     lib_gelocus_Vec3    pos;    ///< [km] Position vector
     lib_gelocus_Vec3    vel;    ///< [km/s] Velocity vector
-    lib_gelocus_Frame   frame;  ///< Reference frame which coordinates are relative to
     // TODO: Is there a way to avoid copying around, pointer perhaps?
     lib_gelocus_EOPData eop;    ///< EOP correction parameters at this time (if any)
+    lib_gelocus_Frame   frame;  ///< Reference frame which coordinates are relative to
 } lib_gelocus_StateVector;
 
 /// Numerical transformation between two reference frames
@@ -135,8 +135,8 @@ typedef struct {
     double jc;                      ///< [julian century] Time stamp
     lib_gelocus_Frame   from;       ///< Origin reference frame
     lib_gelocus_Frame   to;         ///< Destination reference frame
-    lib_gelocus_Matrix3 matrix;     ///< Linear transformation as a 3×3 matrix
     lib_gelocus_EOPData eop;        ///< EOP correction parameters at this time (if any)
+    lib_gelocus_Matrix3 matrix;     ///< Linear transformation as a 3×3 matrix
 } lib_gelocus_Transformation;
 
 /// Vector norm

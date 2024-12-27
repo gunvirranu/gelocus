@@ -30,6 +30,8 @@
 #ifndef GELOCUS_COMMON_PRIVATE_H
 #define GELOCUS_COMMON_PRIVATE_H
 
+#define UNUSED(x)   ((void) x)
+
 static const double PI = 3.141592653589793238462643383279;
 static const double RAD_PER_DEG = 0.017453292519943295769;
 static const double DEG_PER_RAD = 57.29577951308232087680;
