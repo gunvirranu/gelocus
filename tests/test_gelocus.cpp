@@ -158,7 +158,9 @@ TEST_CASE("test_apply_transformation")
         .from = LIB_GELOCUS_FRAME_J2000,
         .to   = LIB_GELOCUS_FRAME_ECEF,
         .matrix = LIB_GELOCUS_MATRIX_IDENTITY,
-        .eop = { 0 },
+        .eop = {
+            .dPsi = 0.01,
+        },
     };
     lib_gelocus_StateVector in = {
         .jc = LIB_GELOCUS_EPOCH_J2000_JC,
@@ -173,26 +175,37 @@ TEST_CASE("test_apply_transformation")
     // Verify no work if NULL pointer
     CHECK_FALSE(lib_gelocus_apply_transformation(trans, in, NULL));
 
-    // Verify no work if from/to frames are the same
+    // Verify no work if from frame doesn't match input vector
     in.frame = LIB_GELOCUS_FRAME_ECEF;
     CHECK_FALSE(lib_gelocus_apply_transformation(trans, in, &out));
-    CHECK_VEC(out.pos, vec, 1e-20);  // Verify `out` vector is untouched
+    // Verify `out` EOP data is untouched
+    CHECK(out.eop.dPsi == 0);
+    // Verify `out` vector is untouched
+    CHECK_VEC(out.pos, vec, 1e-20);
+    // Revert
     in.frame = LIB_GELOCUS_FRAME_J2000;
 
     // Verify no work if timestamp mismatch
     in.jc += (100 * LIB_GELOCUS_DELTA_JC_PER_DAY);
     CHECK_FALSE(lib_gelocus_apply_transformation(trans, in, &out));
-    CHECK_VEC(out.pos, vec, 1e-20);  // Verify `out` vector is untouched
+    // Verify `out` EOP data is untouched
+    CHECK(out.eop.dPsi == 0);
+    // Verify `out` vector is untouched
+    CHECK_VEC(out.pos, vec, 1e-20);
+    // Revert
     in.jc = LIB_GELOCUS_EPOCH_J2000_JC;
 
-    // Check identity transformation is applied if conditions correct
+    // Verify transformation is applied if conditions correct
     CHECK(lib_gelocus_apply_transformation(trans, in, &out));
+    // Verfy output state vector timestamp is copied
     CHECK(out.jc == LIB_GELOCUS_EPOCH_J2000_JC);
+    // Verify output frame makes sense
+    CHECK(out.frame == trans.to);
+    // Verify EOP data from transformation is copied
+    CHECK(out.eop.dPsi == trans.eop.dPsi);
+    // Verify output vec is computed (matrix is identity)
     vec = in.pos;
     CHECK_VEC(out.pos, vec, 1e-20);
-    CHECK(out.frame == trans.to);
-
-    // TODO: test case to confirm transformation EOP is used and not vector
 }
 
 TEST_CASE("test_transform" * doctest::skip())

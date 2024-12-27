@@ -167,10 +167,10 @@ double lib_gelocus_jd_frac_to_jc(
 
 /// Apply a transformation between two frames to a state vector
 ///
-/// The [lib_gelocus_EOPData] data provided with the [lib_gelocus_StateVector] itself is ignored.
-/// Only that in the [lib_gelocus_Transformation] is used. Similarly, the timestamp (`jc`) of
-/// the [lib_gelocus_Transformation] and [lib_gelocus_StateVector] are cross-checked to confirm
-/// they're the same.
+/// Both the [lib_gelocus_EOPData] and timestamp (`jc`) data provided with either the
+/// [lib_gelocus_StateVector] or [lib_gelocus_Transformation] are ignored. The pre-computed
+/// matrix is used as-is. The frames and timestamp (`jc`) are cross-checked between the two
+/// to confirm they're the same.
 ///
 /// \return `true` if the transformation is valid and returned in `out`
 /// \return `false` if any of the following are true:
