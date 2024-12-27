@@ -19,7 +19,11 @@ add_subdirectory(../../doctest ../build/doctest)
 # )
 # FetchContent_MakeAvailable(doctest)
 
-add_executable(test_gelocus test_gelocus.cpp)
+add_executable(
+    test_gelocus
+    test_gelocus.cpp test_iau76.cpp
+)
+
 target_link_libraries(test_gelocus PRIVATE gelocus doctest)
 
 # Restore previous

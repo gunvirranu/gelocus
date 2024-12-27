@@ -34,9 +34,7 @@
 
 #include "common_private.h"
 
-// FK5 / IAU-76 Theory
-
-static double greenwich_mean_sidereal_time(const double jc_ut1) {
+double lib_gelocus_gmst(const double jc_ut1) {
     static const double cs[] = {
             67310.54841, 876600.0 * 3600 + 8640184.812866, 0.093104, -6.2e-6
     };
@@ -49,8 +47,8 @@ static double greenwich_mean_sidereal_time(const double jc_ut1) {
     return gmst;
 }
 
-///< MOD to J2000
-static void iau76_precession(const double jc, lib_gelocus_Matrix3 * const P) {
+void lib_gelocus_iau76_precession(const double jc, lib_gelocus_Matrix3 * const P)
+{
     if (P == NULL)
     {
         return;
