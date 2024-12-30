@@ -1,3 +1,8 @@
+/**
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2024 Gunvir Singh Ranu
+ */
+
 #include <doctest/doctest.h>
 
 extern "C" {
