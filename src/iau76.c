@@ -40,9 +40,9 @@ void lib_gelocus_iau76_precession(const double jc, lib_gelocus_Matrix3 * const P
     const double z_as = jc * (2306.2181 + jc * (1.09468 + jc * 0.018203));
 
     // Convert all from [arcsecond] to [rad]
-    const double zeta = zeta_as * RAD_PER_ARCSEC;
-    const double theta = theta_as * RAD_PER_ARCSEC;
-    const double z = z_as * RAD_PER_ARCSEC;
+    const double zeta = zeta_as * ARCSEC_TO_RAD;
+    const double theta = theta_as * ARCSEC_TO_RAD;
+    const double z = z_as * ARCSEC_TO_RAD;
 
     const double cos_zeta = cos(zeta);
     const double sin_zeta = sin(zeta);

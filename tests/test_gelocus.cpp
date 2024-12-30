@@ -8,6 +8,7 @@
 
 extern "C" {
 #  include <gelocus/gelocus.h>
+#  include "../src/common_private.h"
 };
 
 using doctest::Approx;
@@ -26,6 +27,17 @@ typedef lib_gelocus_Matrix3     Matrix3;
 
 TEST_CASE("test_constants")
 {
+    // Check pi is behaving like pi
+    CHECK(PI == Approx(3).epsilon(0.05));
+    CHECK(RAD_TO_DEG * DEG_TO_RAD == 1);
+
+    // Check arcmin and arcsec conversions make sense
+    CHECK(DEG_TO_ARCMIN * ARCMIN_TO_ARCSEC == DEG_TO_ARCSEC);
+    CHECK(DEG_TO_RAD / DEG_TO_ARCMIN == Approx(ARCMIN_TO_RAD).epsilon(1e-16));
+    CHECK(DEG_TO_RAD / DEG_TO_ARCSEC == Approx(ARCSEC_TO_RAD).epsilon(1e-16));
+    CHECK(1e-3 * ARCSEC_TO_RAD == Approx(MAS_TO_RAD).epsilon(1e-16));
+    CHECK(1e-4 * ARCSEC_TO_RAD == Approx(P1MAS_TO_RAD).epsilon(1e-16));
+
     // Check J2000 epochs in julian date and julian century are the same
     CHECK(lib_gelocus_jd_to_jc(LIB_GELOCUS_EPOCH_J2000_JD) == LIB_GELOCUS_EPOCH_J2000_JC);
 

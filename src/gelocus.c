@@ -110,5 +110,6 @@ lib_gelocus_StateVector lib_gelocus_transform(
 
 void lib_gelocus_compute_transformation_matrix(lib_gelocus_Transformation * trans)
 {
-
+    // FIXME: impl
+    UNUSED(trans);
 }
