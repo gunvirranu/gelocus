@@ -15,3 +15,12 @@
 *.lib
 *.exe
 *.out
+
+### CMake ###
+build/
+cmake-build-*/
+CMakeUserPresets.json
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+Makefile
