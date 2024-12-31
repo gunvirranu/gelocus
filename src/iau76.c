@@ -13,14 +13,18 @@
 
 #include "common_private.h"
 
-double lib_gelocus_gmst(const double jc_ut1) {
+double lib_gelocus_gmst(const double jc_ut1)
+{
     static const double cs[] = {
             67310.54841, 876600.0 * 3600 + 8640184.812866, 0.093104, -6.2e-6
     };
+
     // Horner's method for polynomial evaluation
     const double gmst_secs = cs[0] + jc_ut1 * (cs[1] + jc_ut1 * (cs[2] + jc_ut1 * cs[3]));
+
     double gmst = fmod(deg_to_rad(gmst_secs / 240), 2 * PI);
-    if (gmst < 0) {
+    if (gmst < 0)
+    {
         gmst += 2 * PI;
     }
     return gmst;
@@ -35,14 +39,14 @@ void lib_gelocus_iau76_precession(const double jc, lib_gelocus_Matrix3 * const P
 
     // TODO: explain where #'s came from
     // All in [arcsecond], uses Horner's method
-    const double zeta_as = jc * (2306.2181 + jc * (0.30188 + jc * 0.017998));
-    const double theta_as = jc * (2004.3109 + jc * (-0.42665 + jc * -0.041833));
-    const double z_as = jc * (2306.2181 + jc * (1.09468 + jc * 0.018203));
+    const double zeta_arcsec = jc * (2306.2181 + jc * (0.30188 + jc * 0.017998));
+    const double theta_arcsec = jc * (2004.3109 + jc * (-0.42665 + jc * -0.041833));
+    const double z_arcsec = jc * (2306.2181 + jc * (1.09468 + jc * 0.018203));
 
     // Convert all from [arcsecond] to [rad]
-    const double zeta = zeta_as * ARCSEC_TO_RAD;
-    const double theta = theta_as * ARCSEC_TO_RAD;
-    const double z = z_as * ARCSEC_TO_RAD;
+    const double zeta = zeta_arcsec * ARCSEC_TO_RAD;
+    const double theta = theta_arcsec * ARCSEC_TO_RAD;
+    const double z = z_arcsec * ARCSEC_TO_RAD;
 
     const double cos_zeta = cos(zeta);
     const double sin_zeta = sin(zeta);
@@ -61,6 +65,90 @@ void lib_gelocus_iau76_precession(const double jc, lib_gelocus_Matrix3 * const P
     P->row3.x = -sin_theta * cos_z;
     P->row3.y = -sin_theta * sin_z;
     P->row3.z = cos_theta;
+}
+
+void lib_gelocus_iau80_nutation(
+    const double jc,
+    const lib_gelocus_EOPData eop,
+    lib_gelocus_Matrix3 * const N,
+    double * const p_mean_eps,
+    double * const p_omega,
+    double * const p_delta_psi
+) {
+    // TODO: explain
+    const double mean_eps_arcsec = 84381.448 + jc * (-46.8150 + jc * (-0.00059 + jc * 0.001813));
+    const double mean_eps = fmod(mean_eps_arcsec * ARCSEC_TO_RAD, 2 * PI);
+
+    // Delaunay fundamental arguments in [deg]
+    const double l_deg = 134.96298139 + jc * (1717915922.6330 + jc * (31.310 + jc * 0.064));
+    const double l1_deg = 357.52772333 + jc * (129596581.2240 + jc * (-0.577 + jc * -0.012));
+    const double f_deg = 93.27191028 + jc * (1739527263.1370 + jc * (-13.257 + jc * 0.011));
+    const double d_deg = 297.85036306 + jc * (1602961601.3280 + jc * (-6.891 + jc * 0.019));
+    const double omega_deg = 125.04452222 + jc * (-6962890.5390 + jc * (7.455 + jc * 0.008));
+
+    // Convert from [deg] to [rad]
+    const double l = deg_to_rad(fmod(l_deg, 360));
+    const double l1 = deg_to_rad(fmod(l1_deg, 360));
+    const double f = deg_to_rad(fmod(f_deg, 360));
+    const double d = deg_to_rad(fmod(d_deg, 360));
+    const double omega = deg_to_rad(fmod(omega_deg, 360));
+
+    double delta_psi_p1mas = 0.0;
+    double delta_eps_p1mas = 0.0;
+    // Sum in reverse order to preserve floating point accuracy
+    // TODO: see if this can be made size_t
+    for (int i = LIB_GELOCUS_IAU80_NUTATION_TERMS - 1; i >= 0; --i)
+    {
+        const lib_gelocus_IAU80NutationCoeffSet * const coeff = &LIB_GELOCUS_IAU80_NUTATION_COEFFS[i];
+
+        const double arg = (l * coeff->l) + (l1 * coeff->l1) + (f * coeff->f) + (d * coeff->d) + (omega * coeff->omg);
+
+        delta_psi_p1mas += (coeff->sp + jc * coeff->spt) * sin(arg);
+        delta_eps_p1mas += (coeff->ce + jc * coeff->cet) * cos(arg);
+    }
+
+    // Add in EOP corrections to GCRF
+    delta_psi_p1mas += eop.dPsi;
+    delta_eps_p1mas += eop.dEps;
+
+    const double delta_psi = fmod(delta_psi_p1mas * P1MAS_TO_RAD, 2 * PI);
+    const double delta_eps = fmod(delta_eps_p1mas * P1MAS_TO_RAD, 2 * PI);
+    const double true_eps = mean_eps + delta_eps;
+
+    const double sin_psi = sin(delta_psi);
+    const double cos_psi = cos(delta_psi);
+    const double sin_eps = sin(mean_eps);
+    const double cos_eps = cos(mean_eps);
+    const double sin_true_eps = sin(true_eps);
+    const double cos_true_eps = cos(true_eps);
+
+    if (N != NULL)
+    {
+        // Compute nutation matrix (TODO: explain which rotation)
+        N->row1.x = cos_psi;
+        N->row1.y = cos_true_eps * sin_psi;
+        N->row1.z = sin_true_eps * sin_psi;
+        N->row2.x = -cos_eps * sin_psi;
+        N->row2.y = cos_true_eps * cos_eps * cos_psi + sin_true_eps * sin_eps;
+        N->row2.z = sin_true_eps * cos_eps * cos_psi - cos_true_eps * sin_eps;
+        N->row3.x = -sin_eps * sin_psi;
+        N->row3.y = cos_true_eps * sin_eps * cos_psi - sin_true_eps * cos_eps;
+        N->row3.z = sin_true_eps * sin_eps * cos_psi + cos_true_eps * cos_eps;
+    }
+
+    // Other optional outputs
+    if (p_mean_eps != NULL)
+    {
+        *p_mean_eps = mean_eps;
+    }
+    if (p_omega != NULL)
+    {
+        *p_omega = omega;
+    }
+    if (p_delta_psi != NULL)
+    {
+        *p_delta_psi = delta_psi;
+    }
 }
 
 // Moved this ugly boy to the bottom of the file to keep out of the way
