@@ -110,6 +110,27 @@ lib_gelocus_StateVector lib_gelocus_transform(
 
 void lib_gelocus_compute_transformation_matrix(lib_gelocus_Transformation * trans)
 {
-    // FIXME: impl
-    UNUSED(trans);
+    if (trans == NULL)
+    {
+        return;
+    }
+}
+
+lib_gelocus_Transformation lib_gelocus_invert_transformation(const lib_gelocus_Transformation trans)
+{
+    lib_gelocus_Transformation inverse = trans;
+
+    // Flip frames
+    inverse.from = trans.to;
+    inverse.to = trans.from;
+
+    // Transpose rotation matrix for inverse
+    inverse.matrix.row1.y = trans.matrix.row2.x;  // (0, 1)
+    inverse.matrix.row2.x = trans.matrix.row1.y;  // (1, 0)
+    inverse.matrix.row1.z = trans.matrix.row3.x;  // (0, 2)
+    inverse.matrix.row3.x = trans.matrix.row1.z;  // (2, 0)
+    inverse.matrix.row2.z = trans.matrix.row3.y;  // (1, 2)
+    inverse.matrix.row3.y = trans.matrix.row2.z;  // (2, 1)
+
+    return inverse;
 }

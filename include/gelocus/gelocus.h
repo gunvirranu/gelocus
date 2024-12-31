@@ -182,4 +182,7 @@ lib_gelocus_StateVector lib_gelocus_transform(
 /// populated. This only computes/fills out the `matrix` field, previous values unused.
 void lib_gelocus_compute_transformation_matrix(lib_gelocus_Transformation * trans);
 
+/// Return the inverse transformation
+lib_gelocus_Transformation lib_gelocus_invert_transformation(lib_gelocus_Transformation trans);
+
 #endif  // GELOCUS_GELOCUS_H
