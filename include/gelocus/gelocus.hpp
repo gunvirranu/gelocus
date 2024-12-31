@@ -83,17 +83,6 @@ namespace detail {
 
 // Common
 
-// ECEF to PEF
-void fk5_polar_motion(const EOPData eop, Matrix &PM) {
-    const double sin_xp = std::sin(eop.xp);
-    const double cos_xp = std::cos(eop.xp);
-    const double sin_yp = std::sin(eop.yp);
-    const double cos_yp = std::cos(eop.yp);
-    PM(0, 0) = cos_xp         ; PM(0, 1) =  0     ; PM(0, 2) = -sin_xp         ;
-    PM(1, 0) = sin_xp * sin_yp; PM(1, 1) =  cos_yp; PM(1, 2) =  cos_xp * sin_yp;
-    PM(2, 0) = sin_xp * cos_yp; PM(2, 1) = -sin_yp; PM(2, 2) =  cos_xp * cos_yp;
-}
-
 void teme_to_pef(const double jd, Matrix &S) {
     const double jc = jd_to_jc(jd);
     const double gmst = greenwich_mean_sidereal_time(jc);

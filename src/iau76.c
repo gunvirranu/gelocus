@@ -30,6 +30,24 @@ double lib_gelocus_gmst(const double jc_ut1)
     return gmst;
 }
 
+void lib_gelocus_fk5_polar_motion(const lib_gelocus_EOPData eop, lib_gelocus_Matrix3 * const PM)
+{
+    if (PM == NULL)
+    {
+        return;
+    }
+
+    const double cos_xp = cos(eop.xp);
+    const double sin_xp = sin(eop.xp);
+    const double sin_yp = sin(eop.yp);
+    const double cos_yp = cos(eop.yp);
+
+    // TODO: explain polar motion rotation choice
+    PM->row1.x = cos_xp         ; PM->row1.y =  0.0   ; PM->row1.z = -sin_xp         ;
+    PM->row2.x = sin_xp * sin_yp; PM->row2.y =  cos_yp; PM->row2.z =  cos_xp * sin_yp;
+    PM->row3.x = sin_xp * cos_yp; PM->row3.y = -sin_yp; PM->row3.z =  cos_xp * cos_yp;
+}
+
 void lib_gelocus_iau76_sidereal(
     const double jc_ut1,
     const double mean_eps,

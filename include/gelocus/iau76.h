@@ -42,6 +42,12 @@ extern const lib_gelocus_IAU80NutationCoeffSet LIB_GELOCUS_IAU80_NUTATION_COEFFS
 /// Greenwich Mean Sidereal Time in UT1
 double lib_gelocus_gmst(double jc_ut1);
 
+/// FK5 Polar Motion theory for ECEF to PEF
+void lib_gelocus_fk5_polar_motion(
+    lib_gelocus_EOPData eop,    ///< Earth Orientation Parameters
+    lib_gelocus_Matrix3 * PM    ///< Polar motion rotation matrix (ignored if NULL)
+);
+
 /// IAU-1976 Nutation theory for PEF to TOD
 void lib_gelocus_iau76_sidereal(
     double jc_ut1,              ///< [julian century] Timestamp in UT1
