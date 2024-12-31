@@ -83,26 +83,6 @@ namespace detail {
 
 // Common
 
-// PEF to TOD
-void iau76_sidereal(
-    const double jd, const double mean_eps, const double omega, const double delta_psi,
-    Matrix &S
-) {
-    const double jc = jd_to_jc(jd);
-    const double gmst = greenwich_mean_sidereal_time(jc);
-    double ast = gmst + delta_psi * std::cos(mean_eps);
-    if (jd > 2450449.5) {
-        ast += 0.002640 * PI / (3600 * 180) * std::sin(omega);
-        ast += 0.000063 * PI / (3600 * 180) * std::sin(2 * omega);
-    }
-    ast = std::fmod(ast, 2 * PI);
-    const double sin_ast = std::sin(ast);
-    const double cos_ast = std::cos(ast);
-    S(0, 0) = cos_ast; S(0, 1) = -sin_ast; S(0, 2) = 0;
-    S(1, 0) = sin_ast; S(1, 1) =  cos_ast; S(1, 2) = 0;
-    S(2, 0) = 0      ; S(2, 1) =  0      ; S(2, 2) = 1;
-}
-
 // ECEF to PEF
 void fk5_polar_motion(const EOPData eop, Matrix &PM) {
     const double sin_xp = std::sin(eop.xp);

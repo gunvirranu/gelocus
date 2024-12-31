@@ -30,6 +30,39 @@ double lib_gelocus_gmst(const double jc_ut1)
     return gmst;
 }
 
+void lib_gelocus_iau76_sidereal(
+    const double jc_ut1,
+    const double mean_eps,
+    const double omega,
+    const double delta_psi,
+    lib_gelocus_Matrix3 * const S
+) {
+    if (S == NULL)
+    {
+        return;
+    }
+
+    const double gmst = lib_gelocus_gmst(jc_ut1);
+    double ast = gmst + (delta_psi * cos(mean_eps));
+
+    // TODO: explain this pls pls, also test JD -> JC maybe
+    static const double JD_AST_DELTA = 2450449.5;
+    if (jc_ut1 > lib_gelocus_jd_to_jc(JD_AST_DELTA))
+    {
+        ast += ARCSEC_TO_RAD * 0.002640 * sin(omega);
+        ast += ARCSEC_TO_RAD * 0.000063 * sin(2 * omega);
+    }
+    ast = fmod(ast, 2 * PI);
+
+    const double sin_ast = sin(ast);
+    const double cos_ast = cos(ast);
+
+    // TODO: explain rotation matrix choice
+    S->row1.x = cos_ast;  S->row1.y = -sin_ast;  S->row1.z = 0.0;
+    S->row2.x = sin_ast;  S->row2.y =  cos_ast;  S->row2.z = 0.0;
+    S->row3.x = 0.0    ;  S->row3.y =  0.0    ;  S->row3.z = 1.0;
+}
+
 void lib_gelocus_iau76_precession(const double jc, lib_gelocus_Matrix3 * const P)
 {
     if (P == NULL)

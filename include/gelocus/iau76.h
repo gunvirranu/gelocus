@@ -42,6 +42,15 @@ extern const lib_gelocus_IAU80NutationCoeffSet LIB_GELOCUS_IAU80_NUTATION_COEFFS
 /// Greenwich Mean Sidereal Time in UT1
 double lib_gelocus_gmst(double jc_ut1);
 
+/// IAU-1976 Nutation theory for PEF to TOD
+void lib_gelocus_iau76_sidereal(
+    double jc_ut1,              ///< [julian century] Timestamp in UT1
+    double mean_eps,            ///< @todo
+    double omega,               ///< @todo
+    double delta_psi,           ///< @todo
+    lib_gelocus_Matrix3 * S     ///< Sidereal rotation matrix (ignored if NULL)
+);
+
 /// IAU-1980 Nutation theory for TOD to MOD
 ///
 /// @note The pointer outputs are optional, as in they are ignored if NULL.
