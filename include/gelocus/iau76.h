@@ -42,18 +42,21 @@ extern const lib_gelocus_IAU80NutationCoeffSet LIB_GELOCUS_IAU80_NUTATION_COEFFS
 /// Greenwich Mean Sidereal Time in UT1
 double lib_gelocus_gmst(double jc_ut1);
 
-/// IAU-1976 Precession theory for MOD to J2000
-void lib_gelocus_iau76_precession(double jc_ut1, lib_gelocus_Matrix3 * P);
-
 /// IAU-1980 Nutation theory for TOD to MOD
+///
+/// @note The pointer outputs are optional, as in they are ignored if NULL.
+///       You are welcome to only consume those which you desire.
 void lib_gelocus_iau80_nutation(
     double jc_ut1,              ///< [julian century] Timestamp in UT1
     lib_gelocus_EOPData eop,    ///< Earth Orientation Parameters
-    lib_gelocus_Matrix3 * N,    ///< Nutation rotation matrix
+    lib_gelocus_Matrix3 * N,    ///< Nutation rotation matrix (ignored if NULL)
     // TODO: consider consolidating into a struct
-    double * mean_eps,          ///< @todo
-    double * omega,             ///< @todo
-    double * delta_psi          ///< @todo
+    double * mean_eps,          ///< @todo (ignored if NULL)
+    double * omega,             ///< @todo (ignored if NULL)
+    double * delta_psi          ///< @todo (ignored if NULL)
 );
+
+/// IAU-1976 Precession theory for MOD to J2000
+void lib_gelocus_iau76_precession(double jc_ut1, lib_gelocus_Matrix3 * P);
 
 #endif  // GELOCUS_IAU76_H
