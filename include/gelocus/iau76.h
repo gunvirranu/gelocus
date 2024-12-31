@@ -48,6 +48,12 @@ void lib_gelocus_fk5_polar_motion(
     lib_gelocus_Matrix3 * PM    ///< Polar motion rotation matrix (ignored if NULL)
 );
 
+/// SGP4 TEME to PEF transformation
+void lib_gelocus_teme_to_pef(
+    double jc_ut1,              ///< [julian century] Timestamp in UT1
+    lib_gelocus_Matrix3 * S     ///< TEME to PEF rotation matrix (ignored if NULL)
+);
+
 /// IAU-1976 Nutation theory for PEF to TOD
 void lib_gelocus_iau76_sidereal(
     double jc_ut1,              ///< [julian century] Timestamp in UT1

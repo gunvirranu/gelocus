@@ -13,6 +13,9 @@
 
 #include "common_private.h"
 
+// TODO: explain this pls pls, also test JD -> JC maybe
+static const double JD_AST_DELTA = 2450449.5;
+
 double lib_gelocus_gmst(const double jc_ut1)
 {
     static const double cs[] = {
@@ -48,6 +51,33 @@ void lib_gelocus_fk5_polar_motion(const lib_gelocus_EOPData eop, lib_gelocus_Mat
     PM->row3.x = sin_xp * cos_yp; PM->row3.y = -sin_yp; PM->row3.z =  cos_xp * cos_yp;
 }
 
+void lib_gelocus_teme_to_pef(const double jc_ut1, lib_gelocus_Matrix3 * const S)
+{
+    // TODO: see if easy to commonize with omega calc in nutation
+    const double omega_delta_arcsec = jc_ut1 * (-6962890.5390 + jc_ut1 * (7.455 + jc_ut1 * 0.008));
+    const double omega_deg = 125.04452222 + omega_delta_arcsec / DEG_TO_ARCSEC;
+    const double omega = deg_to_rad(fmod(omega_deg, 360));
+
+    const double gmst = lib_gelocus_gmst(jc_ut1);
+    double gmstg = gmst;
+
+    // TODO: pull out common func with sidereal
+    if (jc_ut1 > lib_gelocus_jd_to_jc(JD_AST_DELTA))
+    {
+        gmstg += ARCSEC_TO_RAD * 0.002640 * sin(omega);
+        gmstg += ARCSEC_TO_RAD * 0.000063 * sin(2 * omega);
+    }
+    gmstg = fmod(gmstg, 2 * PI);
+
+    const double sg = sin(gmstg);
+    const double cg = cos(gmstg);
+
+    // TODO: explain rotation choice
+    S->row1.x =  cg;  S->row1.y =  sg;  S->row1.z = 0.0;
+    S->row2.x = -sg;  S->row2.y =  cg;  S->row2.z = 0.0;
+    S->row3.x = 0.0;  S->row3.y = 0.0;  S->row3.z = 1.0;
+}
+
 void lib_gelocus_iau76_sidereal(
     const double jc_ut1,
     const double mean_eps,
@@ -63,8 +93,6 @@ void lib_gelocus_iau76_sidereal(
     const double gmst = lib_gelocus_gmst(jc_ut1);
     double ast = gmst + (delta_psi * cos(mean_eps));
 
-    // TODO: explain this pls pls, also test JD -> JC maybe
-    static const double JD_AST_DELTA = 2450449.5;
     if (jc_ut1 > lib_gelocus_jd_to_jc(JD_AST_DELTA))
     {
         ast += ARCSEC_TO_RAD * 0.002640 * sin(omega);

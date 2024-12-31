@@ -78,34 +78,6 @@ Position<To> Position<F>::transform(const double jd) const {
     return A.apply(*this);
 }
 
-// For pseudo-"private" implementation details
-namespace detail {
-
-// Common
-
-void teme_to_pef(const double jd, Matrix &S) {
-    const double jc = jd_to_jc(jd);
-    const double gmst = greenwich_mean_sidereal_time(jc);
-    const double omega_deg = 125.04452222 + jc * (
-        -6962890.5390 + jc * (7.455 + jc * 0.008)
-    ) / 3600;
-    const double omega = deg_to_rad(std::fmod(omega_deg, 360));
-    double gmstg = gmst;
-    if (jd > 2450449.5) {
-        gmstg += 0.002640 * PI / (3600 * 180) * sin(omega);
-        gmstg += 0.000063 * PI / (3600 * 180) * sin(2 * omega);
-    }
-    gmstg = fmod(gmstg, 2 * PI);
-
-    const double sg = std::sin(gmstg);
-    const double cg = std::cos(gmstg);
-    S(0, 0) =  cg; S(0, 1) = sg; S(0, 2) = 0;
-    S(1, 0) = -sg; S(1, 1) = cg; S(1, 2) = 0;
-    S(2, 0) =   0; S(2, 1) =  0; S(2, 2) = 1;
-}
-
-} // namespace detail
-
 // Implemented "Basic" Transformations
 
 template <Frame From, Frame To>
