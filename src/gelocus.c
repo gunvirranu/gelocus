@@ -6,7 +6,7 @@
  * Copyright (c) 2024 Gunvir Singh Ranu
  */
 
-#include "gelocus/gelocus.h"
+#include "lib_gelocus/gelocus.h"
 
 #include <stddef.h>
 #include <math.h>

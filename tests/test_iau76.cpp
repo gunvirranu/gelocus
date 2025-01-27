@@ -6,8 +6,8 @@
 #include <doctest/doctest.h>
 
 extern "C" {
-#  include <gelocus/gelocus.h>
-#  include <gelocus/iau76.h>
+#  include <lib_gelocus/gelocus.h>
+#  include <lib_gelocus/iau76.h>
 };
 
 TEST_CASE("test_gmst")

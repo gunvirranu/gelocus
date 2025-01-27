@@ -7,7 +7,7 @@
 #include <doctest/doctest.h>
 
 extern "C" {
-#  include <gelocus/gelocus.h>
+#  include <lib_gelocus/gelocus.h>
 #  include "../src/common_private.h"
 };
 

@@ -6,7 +6,7 @@
  * Copyright (c) 2024 Gunvir Singh Ranu
  */
 
-#include "gelocus/iau76.h"
+#include "lib_gelocus/iau76.h"
 
 #include <stddef.h>
 #include <math.h>
